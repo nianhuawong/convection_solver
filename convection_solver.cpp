@@ -97,7 +97,7 @@ void time_marching_beam_warming()
 	for (int iNode = 2; iNode < numberOfGridPoints - 1; ++iNode)
 	{
 		qField_N1[iNode] = qField[iNode] - sigma * (qField[iNode] - qField[iNode-1]) 
-                         + 0.5*sigma*(1.0+sigma)*(qField[iNode-2]-2.0*qField[iNode-1]+qField[iNode]);
+                         + 0.5*sigma*(1.0-sigma)*(qField[iNode]-2.0*qField[iNode-1]+qField[iNode-2]);
 	}
 }
 
