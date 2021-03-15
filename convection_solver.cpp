@@ -16,8 +16,8 @@ int main()
 		load_qField();
 
 		//time_marching_1st_upwind();
-		time_marching_lax_wendroff();
-		//time_marching_beam_warming();   //格式还有bug
+		//time_marching_lax_wendroff();
+		time_marching_beam_warming();   //格式还有bug
 
 		boundary_condition();
 
@@ -94,17 +94,10 @@ void time_marching_lax_wendroff()
 
 void time_marching_beam_warming()
 {
-	vector<double> qField_tmp(numberOfGridPoints);
-	for (int iNode = 1; iNode < numberOfGridPoints - 1; ++iNode)
-	{
-		qField_tmp[iNode] = qField[iNode] - sigma * (qField[iNode] - qField[iNode - 1]);
-	}
-
-	double sigma2 = sigma / ds;
 	for (int iNode = 2; iNode < numberOfGridPoints - 1; ++iNode)
 	{
-		qField_N1[iNode] = 0.5 * ( qField[iNode] + qField_tmp[iNode] - sigma * (qField_tmp[iNode] - qField_tmp[iNode - 1])
-			             - sigma2 * (qField[iNode] - 2.0 * qField[iNode-1] + qField[iNode - 2]) );
+		qField_N1[iNode] = qField[iNode] - sigma * (qField[iNode] - qField[iNode-1]) 
+                         + 0.5*sigma*(1.0+sigma)*(qField[iNode-2]-2.0*qField[iNode-1]+qField[iNode]);
 	}
 }
 

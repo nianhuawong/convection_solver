@@ -5,6 +5,8 @@ $!VarSet |LFDSFN2| = '"results-1st.dat"'
 $!VarSet |LFDSVL2| = '"x" "qField"'
 $!VarSet |LFDSFN3| = '"results-LW.dat"'
 $!VarSet |LFDSVL3| = '"x" "qField"'
+$!VarSet |LFDSFN4| = '"results.dat"'
+$!VarSet |LFDSVL4| = '"x" "qField"'
 $!SetStyleBase Factory
 $!GlobalPaper 
   PaperSizeInfo
@@ -74,6 +76,17 @@ $!ReadDataSet  '|LFDSFN3|'
   VarNameList = '|LFDSVL3|'
 $!RemoveVar |LFDSVL3|
 $!RemoveVar |LFDSFN3|
+$!ReadDataSet  '|LFDSFN4|'
+  InitialPlotType = XYLine
+  IncludeText = No
+  IncludeGeom = No
+  ReadDataOption = Append
+  ResetStyle = No
+  AssignStrandIDs = Yes
+  VarLoadMode = ByName
+  VarNameList = '|LFDSVL4|'
+$!RemoveVar |LFDSVL4|
+$!RemoveVar |LFDSFN4|
 $!FrameLayout 
   ShowHeader = No
   HeaderColor = Red
@@ -92,7 +105,7 @@ $!FrameName  = 'Frame 001'
 $!GlobalTime 
   SolutionTime = 0
 $!DeleteLineMaps 
-$!ActiveLineMaps  =  [1-3]
+$!ActiveLineMaps  =  [1-4]
 $!GlobalLinePlot 
   DataLabels
     {
@@ -192,6 +205,39 @@ $!LineMap  [3]
       GeomShape = Grad
       }
     Color = Blue
+    FillMode = UseLineColor
+    FillColor = Red
+    Size = 1.5
+    }
+  BarCharts
+    {
+    Color = Red
+    FillColor = Red
+    }
+  ErrorBars
+    {
+    Color = Red
+    }
+$!LineMap  [4]
+  Name = 'Beam_Warming'
+  Assign
+    {
+    Zone = 4
+    XAxisVar = 1
+    YAxisVar = 2
+    }
+  Lines
+    {
+    Color = Purple
+    LineThickness = 0.3
+    }
+  Symbols
+    {
+    SymbolShape
+      {
+      GeomShape = Diamond
+      }
+    Color = Purple
     FillMode = UseLineColor
     FillColor = Red
     Size = 1.5
