@@ -37,3 +37,4 @@ void output_results(string fileName);
 
 void generate_grid_1D(int numberOfGridPoints);
 void set_time_march_method();
+double minmod_limiter(double a, double b)

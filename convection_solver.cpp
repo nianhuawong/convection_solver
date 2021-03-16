@@ -212,3 +212,18 @@ void set_time_march_method()
 		exit(1);
 	}
 }
+
+//ÏÞÖÆÆ÷º¯Êý
+double minmod_limiter(double a, double b)
+{
+	if (a * b <= 0)
+		return 0;
+	else
+	{
+		if ((fabs(a) - fabs(b)) > 0)
+			return b;
+		else
+			return a;
+	}
+}
+
