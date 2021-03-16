@@ -5,7 +5,7 @@ $!VarSet |LFDSFN2| = '"results-1st.dat"'
 $!VarSet |LFDSVL2| = '"x" "qField"'
 $!VarSet |LFDSFN3| = '"results-LW.dat"'
 $!VarSet |LFDSVL3| = '"x" "qField"'
-$!VarSet |LFDSFN4| = '"results.dat"'
+$!VarSet |LFDSFN4| = '"results-BW.dat"'
 $!VarSet |LFDSVL4| = '"x" "qField"'
 $!SetStyleBase Factory
 $!GlobalPaper 
