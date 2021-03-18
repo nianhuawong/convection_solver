@@ -1,15 +1,25 @@
 #pragma once
-
-const double coeff_a = 1;
 const double PI = 3.1415926;
 
 int iter;
-int numberOfGridPoints = 81;
 int numberOfTimeSteps  = 20000;
 int inflowType = 0;
 
-double endCoord  = 2.0 * PI;//;
-double totalTime = 4.0 * PI;// 1.0;   //CTCS格式和L-W格式色散特性相同,为负色散，取时间t=32pi，其他均为4pi
+//int numberOfGridPoints = 801;
+//const double coeff_a = 1.0;//方波参数
+//double endCoord  = 1.0;
+//double totalTime = 1.0;
+
+//int numberOfGridPoints = 81; 
+//const double coeff_a = 1;		//sine函数的参数
+//double endCoord  = 2.0 * PI;
+//double totalTime = 4.0 * PI;  //CTCS格式和L-W格式色散特性相同,为负色散，取时间t=32pi，其他均为4pi
+
+int numberOfGridPoints = 801; 
+const double coeff_a = 0.2;//分段函数参数
+double endCoord = 1.0;
+double totalTime = 1.0;
+
 double dt;
 double ds;
 double sigma;
@@ -26,9 +36,9 @@ vector< double > xCoordinates;
 
 void initialize_parameter();
 void flow_initialization();
-void flow_initialization_inflow0();
 void flow_initialization_inflow1();
 void flow_initialization_inflow2();
+void flow_initialization_inflow3();
 void load_qField();
 
 typedef void (*Time_Marching_Pointer)(); //自定义void类型的指针函数

@@ -322,6 +322,7 @@ $!LineMap  [6]
   Lines
     {
     Color = Black
+    LinePattern = Dashed
     LineThickness = 0.3
     }
   Symbols

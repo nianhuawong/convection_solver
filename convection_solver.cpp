@@ -17,8 +17,14 @@ int main()
 
 		time_marching();
 
-		//boundary_condition();
-		boundary_condition_periodic();
+		if (inflowType == 3)
+		{
+			boundary_condition();
+		}
+		else
+		{
+			boundary_condition_periodic();
+		}	
 
 		compute_residual();
 
@@ -198,14 +204,10 @@ void flow_initialization()
 	qField_RB.resize(2);
 
 	cout << "please choose inflow type..." << endl;
-	cout << "0--阶跃方波；\t1--sine函数；\t2-分段函数；" << endl;
+	cout << "1--阶跃方波；\t2--sine函数；\t3-分段函数；" << endl;
 	cin >> inflowType;
 
-	if (inflowType==0)
-	{
-		flow_initialization_inflow0();
-	}
-	else if (inflowType == 1)
+	if (inflowType==1)
 	{
 		flow_initialization_inflow1();
 	}
@@ -213,9 +215,13 @@ void flow_initialization()
 	{
 		flow_initialization_inflow2();
 	}
+	else if (inflowType == 3)
+	{
+		flow_initialization_inflow3();
+	}
 }
 
-void flow_initialization_inflow2()
+void flow_initialization_inflow3()
 {
 	if (iter == 0)
 	{
@@ -249,7 +255,7 @@ void flow_initialization_inflow2()
 	boundary_condition();
 }
 
-void flow_initialization_inflow0()
+void flow_initialization_inflow1()
 {
 	if (iter == 0)
 	{
@@ -275,7 +281,7 @@ void flow_initialization_inflow0()
 	boundary_condition_periodic();
 }
 
-void flow_initialization_inflow1()
+void flow_initialization_inflow2()
 {
 	if (iter == 0)
 	{
