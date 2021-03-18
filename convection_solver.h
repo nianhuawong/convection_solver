@@ -1,15 +1,15 @@
 #pragma once
 
-const double coeff_a = 0.2;
+const double coeff_a = 1;
 const double PI = 3.1415926;
 
 int iter;
-int numberOfGridPoints = 801;
+int numberOfGridPoints = 81;
 int numberOfTimeSteps  = 20000;
 int inflowType = 0;
 
-double endCoord  = 1.0;// 2.0 * PI;
-double totalTime = 1.0;// 2.0 * PI;
+double endCoord  = 2.0 * PI;//;
+double totalTime = 32.0 * PI;// 1.0;
 double dt;
 double ds;
 double sigma;
