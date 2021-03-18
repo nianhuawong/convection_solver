@@ -136,15 +136,15 @@ void time_marching_lax_wendroff()
 void time_marching_beam_warming()
 {
 	qField_N1[0] = qField[0] - sigma * (qField[0] - qField_LB[1])
-		+ 0.5 * sigma * (1.0 - sigma) * (qField[0] - 2.0 * qField_LB[1] + qField_LB[0]);
+		- 0.5 * sigma * (1.0 - sigma) * (qField[0] - 2.0 * qField_LB[1] + qField_LB[0]);
 
 	qField_N1[1] = qField[1] - sigma * (qField[1] - qField[0])
-		+ 0.5 * sigma * (1.0 - sigma) * (qField[1] - 2.0 * qField[0] + qField_LB[1]);
+		- 0.5 * sigma * (1.0 - sigma) * (qField[1] - 2.0 * qField[0] + qField_LB[1]);
 
 	for (int iNode = 2; iNode < numberOfGridPoints - 1; ++iNode)
 	{
 		qField_N1[iNode] = qField[iNode] - sigma * (qField[iNode] - qField[iNode-1]) 
-                         + 0.5*sigma*(1.0-sigma)*(qField[iNode]-2.0*qField[iNode-1]+qField[iNode-2]);
+                         - 0.5*sigma*(1.0-sigma)*(qField[iNode]-2.0*qField[iNode-1]+qField[iNode-2]);
 	}
 }
 
