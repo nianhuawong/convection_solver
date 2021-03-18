@@ -61,6 +61,7 @@ void output_residual()
 
 void load_qField()
 {
+	qField_M1 = qField;
 	qField = qField_N1;
 }
 
@@ -72,6 +73,14 @@ void compute_residual()
 	}
 
 	residual = sqrt(residual / numberOfGridPoints);  //L2
+}
+
+void time_marching_CTCS()
+{
+	for (int iNode = 1; iNode < numberOfGridPoints - 1; ++iNode)
+	{
+		qField_N1[iNode] = qField_M1[iNode] - sigma * (qField[iNode + 1] - qField[iNode - 1]);
+	}
 }
 
 void time_marching_1st_upwind()
@@ -106,48 +115,87 @@ void boundary_condition()
 	qField[numberOfGridPoints - 1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];
 
 	qField_N1[0] = 0;
-	qField_N1[numberOfGridPoints - 1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];
+	qField_N1[numberOfGridPoints - 1] = 2.0 * qField_N1[numberOfGridPoints - 2] - qField_N1[numberOfGridPoints - 3];
 }
 
 void boundary_condition_periodic()
 {
 	qField[numberOfGridPoints - 1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];
 	qField[0] = qField[numberOfGridPoints - 1];
-	
-	qField_N1[numberOfGridPoints - 1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];
+
+	qField_M1[numberOfGridPoints - 1] = 2.0 * qField_M1[numberOfGridPoints - 2] - qField_M1[numberOfGridPoints - 3];
+	qField_M1[0] = qField_M1[numberOfGridPoints - 1];
+
+	qField_N1[numberOfGridPoints - 1] = 2.0 * qField_N1[numberOfGridPoints - 2] - qField_N1[numberOfGridPoints - 3];
 	qField_N1[0] = qField_N1[numberOfGridPoints - 1];
 }
 
 void flow_initialization()
 {
+	cout << "please choose inflow type..." << endl;
+	cout << "0--阶跃方波；\t1--sine函数；\t3-分段函数；" << endl;
+	cin >> inflowType;
+
+	if (inflowType==0)
+	{
+		flow_initialization_inflow0();
+	}
+	else if (inflowType == 1)
+	{
+		flow_initialization_inflow1();
+	}
+	else if (inflowType == 2)
+	{
+		flow_initialization_inflow2();
+	}
+}
+
+void flow_initialization_inflow2()
+{
 	//初值
 	qField.resize(numberOfGridPoints);
 	qField_N1.resize(numberOfGridPoints);
-
+	qField_M1.resize(numberOfGridPoints);
 	if (iter == 0)
 	{
-		//for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
-		//{
-		//	double xNode = xCoordinates[iNode];
-		//	if (xNode >= 0.0 && xNode <= 0.2)
-		//	{
-		//		qField[iNode] = 0.0;
-		//	}
-		//	else if(xNode > 0.2 && xNode <= 0.5)
-		//	{
-		//		qField[iNode] = sin((xNode - 0.2) * 10.0 * PI);
-		//	}
-		//	else if (xNode > 0.5 && xNode <= 0.7)
-		//	{
-		//		qField[iNode] = 7.5 * (xNode - 0.5);
-		//	}
-		//	else if (xNode > 0.7 && xNode <= 1.0)
-		//	{
-		//		qField[iNode] = -1.0;
-		//	}
-		//}
-		// 
-		// 
+		for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
+		{
+			double xNode = xCoordinates[iNode];
+			if (xNode >= 0.0 && xNode <= 0.2)
+			{
+				qField[iNode] = 0.0;
+			}
+			else if(xNode > 0.2 && xNode <= 0.5)
+			{
+				qField[iNode] = sin((xNode - 0.2) * 10.0 * PI);
+			}
+			else if (xNode > 0.5 && xNode <= 0.7)
+			{
+				qField[iNode] = 7.5 * (xNode - 0.5);
+			}
+			else if (xNode > 0.7 && xNode <= 1.0)
+			{
+				qField[iNode] = -1.0;
+			}
+		}
+	}
+
+	qField_M1 = qField;
+	qField_N1 = qField;
+
+	output_results("results-accurate.dat");
+
+	boundary_condition();
+}
+
+void flow_initialization_inflow0()
+{
+	//初值
+	qField.resize(numberOfGridPoints);
+	qField_N1.resize(numberOfGridPoints);
+	qField_M1.resize(numberOfGridPoints);
+	if (iter == 0)
+	{
 		for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
 		{
 			double xNode = xCoordinates[iNode];
@@ -155,18 +203,48 @@ void flow_initialization()
 			{
 				qField[iNode] = 1.0;
 			}
-			else 
+			else
 			{
 				qField[iNode] = 0.0;
 			}
 		}
 	}
 
+	qField_M1 = qField;
 	qField_N1 = qField;
 
 	output_results("results-accurate.dat");
 
-	//boundary_condition();
+	boundary_condition_periodic();
+}
+
+void flow_initialization_inflow1()
+{
+	//初值
+	qField.resize(numberOfGridPoints);
+	qField_N1.resize(numberOfGridPoints);
+	qField_M1.resize(numberOfGridPoints);
+	if (iter == 0)
+	{
+		for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
+		{
+			double xNode = xCoordinates[iNode];
+			if (xNode >= 0 && xNode <= 2.0*PI)
+			{
+				qField[iNode] = sin(xNode);
+			}
+			else
+			{
+				qField[iNode] = 0.0;
+			}
+		}
+	}
+
+	qField_M1 = qField;
+	qField_N1 = qField;
+
+	output_results("results-accurate.dat");
+
 	boundary_condition_periodic();
 }
 
@@ -198,7 +276,7 @@ void initialize_parameter()
 void generate_grid_1D( int numberOfGridPoints )
 {
 	double startCoord = 0.0; 
-	double endCoord = 1.0;
+	double endCoord = 2.0 * PI;
 	ds = ( endCoord - startCoord ) / ( numberOfGridPoints - 1 );
 
 	xCoordinates.resize(numberOfGridPoints);
@@ -211,23 +289,28 @@ void generate_grid_1D( int numberOfGridPoints )
 
 void set_time_march_method()
 {
-	cout << "1--1st_upwind;\t2--Lax_Wendroff;\t3--Beam_Warming, please choose!" << endl;
+	cout << "1--CTCS;\t2--1st_upwind;\t3--Lax_Wendroff;\t4--Beam_Warming, please choose!" << endl;
 	int time_march_method;
 	cin >> time_march_method;
-
 	if (time_march_method == 1)
+	{
+		time_marching = &time_marching_CTCS;
+		cout << "time marching method is CTCS!" << endl;
+		outFile = "results-CTCS.dat";		
+	}
+	else if (time_march_method == 2)
 	{
 		time_marching = &time_marching_1st_upwind;
 		cout << "time marching method is 1st_upwind!" << endl;
 		outFile = "results-1st.dat";
 	}
-	else if (time_march_method == 2)
+	else if (time_march_method == 3)
 	{
 		time_marching = &time_marching_lax_wendroff;
 		cout << "time marching method is lax_wendroff!" << endl;
 		outFile = "results-LW.dat";
 	}
-	else if (time_march_method == 3)
+	else if (time_march_method == 4)
 	{
 		time_marching = &time_marching_beam_warming;
 		cout << "time marching method is beam_warming!" << endl;
