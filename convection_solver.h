@@ -9,7 +9,7 @@ int numberOfTimeSteps  = 20000;
 int inflowType = 0;
 
 double endCoord  = 2.0 * PI;//;
-double totalTime = 32.0 * PI;// 1.0;
+double totalTime = 4.0 * PI;// 1.0;   //CTCS格式和L-W格式色散特性相同,为负色散，取时间t=32pi
 double dt;
 double ds;
 double sigma;
