@@ -1,11 +1,11 @@
 #pragma once
 
-const double coeff_a = 1;
+const double coeff_a = 1.0;
 const double PI = 3.14159;
 
 int iter;
-int numberOfGridPoints = 51;
-int numberOfTimeSteps  = 4000;
+int numberOfGridPoints = 201;
+int numberOfTimeSteps  = 10000;
 int inflowType = 0;
 
 double totalTime = 4.0*PI;
@@ -34,6 +34,7 @@ void set_time_march_method();
 
 void time_marching_CTCS();
 void time_marching_1st_upwind();
+void time_marching_2nd_upwind();
 void time_marching_lax_wendroff();
 void time_marching_beam_warming();
 

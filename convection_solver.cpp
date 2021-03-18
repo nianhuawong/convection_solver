@@ -91,6 +91,14 @@ void time_marching_1st_upwind()
 	}
 }
 
+void time_marching_2nd_upwind()
+{
+	for (int iNode = 1; iNode < numberOfGridPoints - 1; ++iNode)
+	{
+		qField_N1[iNode] = qField[iNode] - 0.5 * sigma * (3.0*qField[iNode] - 4.0*qField[iNode - 1] + qField[iNode-2]);
+	}
+}
+
 void time_marching_lax_wendroff()
 {
 	for (int iNode = 1; iNode < numberOfGridPoints - 1; ++iNode)
@@ -289,7 +297,7 @@ void generate_grid_1D( int numberOfGridPoints )
 
 void set_time_march_method()
 {
-	cout << "1--CTCS;\t2--1st_upwind;\t3--Lax_Wendroff;\t4--Beam_Warming, please choose!" << endl;
+	cout << "1--CTCS;\t2--1st_upwind;\t3--2nd_upwind;\t4--Lax_Wendroff;\t5--Beam_Warming, please choose!" << endl;
 	int time_march_method;
 	cin >> time_march_method;
 	if (time_march_method == 1)
@@ -306,11 +314,17 @@ void set_time_march_method()
 	}
 	else if (time_march_method == 3)
 	{
+		time_marching = &time_marching_2nd_upwind;
+		cout << "time marching method is 2nd_upwind!" << endl;
+		outFile = "results-2nd.dat";
+	}
+	else if (time_march_method == 4)
+	{
 		time_marching = &time_marching_lax_wendroff;
 		cout << "time marching method is lax_wendroff!" << endl;
 		outFile = "results-LW.dat";
 	}
-	else if (time_march_method == 4)
+	else if (time_march_method == 5)
 	{
 		time_marching = &time_marching_beam_warming;
 		cout << "time marching method is beam_warming!" << endl;
