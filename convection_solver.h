@@ -1,6 +1,6 @@
 #pragma once
 
-const double coeff_a = 0.2;
+const double coeff_a = 0.1;
 const double PI = 3.14159;
 
 int iter;
@@ -31,10 +31,11 @@ void time_marching_lax_wendroff();
 void time_marching_beam_warming();
 
 void boundary_condition();
+void boundary_condition_periodic();
 void compute_residual();
 void output_residual();
 void output_results(string fileName);
 
 void generate_grid_1D(int numberOfGridPoints);
 void set_time_march_method();
-double minmod_limiter(double a, double b)
+double minmod_limiter(double a, double b);

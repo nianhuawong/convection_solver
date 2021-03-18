@@ -17,7 +17,8 @@ int main()
 
 		time_marching();
 
-		boundary_condition();
+		//boundary_condition();
+		boundary_condition_periodic();
 
 		compute_residual();
 
@@ -108,6 +109,15 @@ void boundary_condition()
 	qField_N1[numberOfGridPoints - 1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];
 }
 
+void boundary_condition_periodic()
+{
+	qField[numberOfGridPoints - 1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];
+	qField[0] = qField[numberOfGridPoints - 1];
+	
+	qField_N1[numberOfGridPoints - 1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];
+	qField_N1[0] = qField_N1[numberOfGridPoints - 1];
+}
+
 void flow_initialization()
 {
 	//³õÖµ
@@ -116,31 +126,48 @@ void flow_initialization()
 
 	if (iter == 0)
 	{
+		//for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
+		//{
+		//	double xNode = xCoordinates[iNode];
+		//	if (xNode >= 0.0 && xNode <= 0.2)
+		//	{
+		//		qField[iNode] = 0.0;
+		//	}
+		//	else if(xNode > 0.2 && xNode <= 0.5)
+		//	{
+		//		qField[iNode] = sin((xNode - 0.2) * 10.0 * PI);
+		//	}
+		//	else if (xNode > 0.5 && xNode <= 0.7)
+		//	{
+		//		qField[iNode] = 7.5 * (xNode - 0.5);
+		//	}
+		//	else if (xNode > 0.7 && xNode <= 1.0)
+		//	{
+		//		qField[iNode] = -1.0;
+		//	}
+		//}
+		// 
+		// 
 		for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
 		{
 			double xNode = xCoordinates[iNode];
-			if (xNode >= 0.0 && xNode <= 0.2)
+			if (xNode >= 0.25 && xNode <= 0.75)
+			{
+				qField[iNode] = 1.0;
+			}
+			else 
 			{
 				qField[iNode] = 0.0;
-			}
-			else if(xNode > 0.2 && xNode <= 0.5)
-			{
-				qField[iNode] = sin((xNode - 0.2) * 10.0 * PI);
-			}
-			else if (xNode > 0.5 && xNode <= 0.7)
-			{
-				qField[iNode] = 7.5 * (xNode - 0.5);
-			}
-			else if (xNode > 0.7 && xNode <= 1.0)
-			{
-				qField[iNode] = -1.0;
 			}
 		}
 	}
 
 	qField_N1 = qField;
 
-	boundary_condition();
+	output_results("results-accurate.dat");
+
+	//boundary_condition();
+	boundary_condition_periodic();
 }
 
 void initialize_parameter()
