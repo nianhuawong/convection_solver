@@ -150,13 +150,13 @@ void time_marching_beam_warming()
 
 void boundary_condition()
 {
-	qField[0] = 0;		//边界值
-	qField[numberOfGridPoints - 1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];  //右边界值是通过外插得到的
+	qField_N1[0] = 0;		//边界值
+	qField_N1[numberOfGridPoints - 1] = 2.0 * qField_N1[numberOfGridPoints - 2] - qField_N1[numberOfGridPoints - 3];  //右边界值是通过外插得到的
 
-	qField_LB[0] = 2.0 * qField[0] - qField[1];	//外插得到虚拟点值
-	qField_LB[1] = 2.0 * qField[0] - qField[1];
-	qField_RB[0] = 2.0 * qField[numberOfGridPoints - 1] - qField[numberOfGridPoints - 2];
-	qField_RB[1] = 2.0 * qField[numberOfGridPoints - 1] - qField[numberOfGridPoints - 2];
+	qField_LB[0] = 2.0 * qField_N1[0] - qField_N1[1];	//外插得到虚拟点值
+	qField_LB[1] = 2.0 * qField_N1[0] - qField_N1[1];
+	qField_RB[0] = 2.0 * qField_N1[numberOfGridPoints - 1] - qField_N1[numberOfGridPoints - 2];
+	qField_RB[1] = 2.0 * qField_N1[numberOfGridPoints - 1] - qField_N1[numberOfGridPoints - 2];
 
 	//qField_N1[0] = 0;
 	//qField_N1[numberOfGridPoints - 1] = 2.0 * qField_N1[numberOfGridPoints - 2] - qField_N1[numberOfGridPoints - 3];
@@ -198,7 +198,7 @@ void flow_initialization()
 	qField_RB.resize(2);
 
 	cout << "please choose inflow type..." << endl;
-	cout << "0--阶跃方波；\t1--sine函数；\t3-分段函数；" << endl;
+	cout << "0--阶跃方波；\t1--sine函数；\t2-分段函数；" << endl;
 	cin >> inflowType;
 
 	if (inflowType==0)

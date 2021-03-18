@@ -1,6 +1,6 @@
 #pragma once
 
-const double coeff_a = 1;
+const double coeff_a = 0.2;
 const double PI = 3.1415926;
 
 int iter;
