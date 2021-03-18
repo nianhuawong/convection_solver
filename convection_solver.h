@@ -1,24 +1,27 @@
 #pragma once
 
-const double coeff_a = 1.0;
-const double PI = 3.14159;
+const double coeff_a = 1;
+const double PI = 3.1415926;
 
 int iter;
-int numberOfGridPoints = 201;
-int numberOfTimeSteps  = 10000;
+int numberOfGridPoints = 801;
+int numberOfTimeSteps  = 20000;
 int inflowType = 0;
 
-double totalTime = 4.0*PI;
+double endCoord  = 1.0;// 2.0 * PI;
+double totalTime = 1.0;// 2.0 * PI;
 double dt;
 double ds;
 double sigma;
-
+double physicalTime = 0.0;
 double residual;
 string outFile;
 
 vector< double > qField;
 vector< double > qField_N1;
 vector< double > qField_M1;
+vector< double > qField_LB;
+vector< double > qField_RB;
 vector< double > xCoordinates;
 
 void initialize_parameter();
@@ -47,3 +50,4 @@ void output_results(string fileName);
 void generate_grid_1D(int numberOfGridPoints);
 
 double minmod_limiter(double a, double b);
+void compute_exact_solution();

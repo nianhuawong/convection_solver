@@ -9,6 +9,8 @@ $!VarSet |LFDSFN4| = '"results-BW.dat"'
 $!VarSet |LFDSVL4| = '"x" "qField"'
 $!VarSet |LFDSFN5| = '"results-CTCS.dat"'
 $!VarSet |LFDSVL5| = '"x" "qField"'
+$!VarSet |LFDSFN6| = '"results-2nd.dat"'
+$!VarSet |LFDSVL6| = '"x" "qField"'
 $!SetStyleBase Factory
 $!GlobalPaper 
   PaperSizeInfo
@@ -54,6 +56,8 @@ $!ReadDataSet  '|LFDSFN1|'
   VarNameList = '|LFDSVL1|'
 $!RemoveVar |LFDSVL1|
 $!RemoveVar |LFDSFN1|
+$!AlterData 
+  Equation = 'v1=v1+0.00000000000001'
 $!ReadDataSet  '|LFDSFN2|'
   InitialPlotType = XYLine
   IncludeText = No
@@ -65,8 +69,6 @@ $!ReadDataSet  '|LFDSFN2|'
   VarNameList = '|LFDSVL2|'
 $!RemoveVar |LFDSVL2|
 $!RemoveVar |LFDSFN2|
-$!AlterData  [1]
-  Equation = 'v1=v1+0.0'
 $!ReadDataSet  '|LFDSFN3|'
   InitialPlotType = XYLine
   IncludeText = No
@@ -100,6 +102,17 @@ $!ReadDataSet  '|LFDSFN5|'
   VarNameList = '|LFDSVL5|'
 $!RemoveVar |LFDSVL5|
 $!RemoveVar |LFDSFN5|
+$!ReadDataSet  '|LFDSFN6|'
+  InitialPlotType = XYLine
+  IncludeText = No
+  IncludeGeom = No
+  ReadDataOption = Append
+  ResetStyle = No
+  AssignStrandIDs = Yes
+  VarLoadMode = ByName
+  VarNameList = '|LFDSVL6|'
+$!RemoveVar |LFDSVL6|
+$!RemoveVar |LFDSFN6|
 $!FrameLayout 
   ShowHeader = No
   HeaderColor = Red
@@ -118,7 +131,7 @@ $!FrameName  = 'Frame 001'
 $!GlobalTime 
   SolutionTime = 0
 $!DeleteLineMaps 
-$!ActiveLineMaps  =  [1-5]
+$!ActiveLineMaps  =  [1-6]
 $!GlobalLinePlot 
   DataLabels
     {
@@ -137,8 +150,8 @@ $!GlobalLinePlot
       }
     XYPos
       {
-      X = 100
-      Y = 100
+      X = 81.531
+      Y = 49
       }
     }
 $!LineMap  [1]
@@ -297,23 +310,44 @@ $!LineMap  [5]
     {
     Color = Red
     }
+$!LineMap  [6]
+  Name = '2nd_upwind'
+  Assign
+    {
+    Zone = 6
+    XAxisVar = 1
+    YAxisVar = 2
+    }
+  Lines
+    {
+    Color = Black
+    LineThickness = 0.3
+    }
+  Symbols
+    {
+    Color = Green
+    FillMode = UseLineColor
+    FillColor = Red
+    Size = 1.5
+    }
+  BarCharts
+    {
+    Color = Red
+    FillColor = Red
+    }
+  ErrorBars
+    {
+    Color = Red
+    }
 $!XYLineAxis 
   DepXToYRatio = 1
 $!XYLineAxis 
   XDetail 1
     {
     RangeMin = 0
-    RangeMax = 6.2831999999999999
+    RangeMax = 1
     AutoGrid = No
-    GRSpacing = 1.5708
-    Gridlines
-      {
-      Show = Yes
-      }
-    MinorGridlines
-      {
-      Show = Yes
-      }
+    GRSpacing = 0.1
     }
 $!XYLineAxis 
   YDetail 1
@@ -321,14 +355,6 @@ $!XYLineAxis
     RangeMin = -1.2
     RangeMax = 1.5
     GRSpacing = 0.5
-    Gridlines
-      {
-      Show = Yes
-      }
-    MinorGridlines
-      {
-      Show = Yes
-      }
     }
 $!FrameControl ActivateByNumber
   Frame = 1

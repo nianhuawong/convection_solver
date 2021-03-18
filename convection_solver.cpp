@@ -23,11 +23,20 @@ int main()
 		compute_residual();
 
 		output_residual();
+		
+		physicalTime += dt;
 	}
 
 	output_results(outFile);
+	
+	compute_exact_solution();
 
 	return 0;
+}
+
+void compute_exact_solution()
+{
+	vector<double> exactSolution(numberOfGridPoints);
 }
 
 void output_results( string fileName )
@@ -51,12 +60,16 @@ void output_results( string fileName )
 
 void output_residual()
 {
-	if (iter % 10 == 0)
+	int residualOutPut = 200;
+	if (iter % (numberOfTimeSteps/residualOutPut) == 0)
 	{
 		cout << "\titer " << "\tresidual" << endl;
 	}
 
-	cout << "\t" << iter << "\t" << residual << endl;
+	if (iter % residualOutPut == 0)
+	{
+		cout << "\t" << iter << "\t" << residual << endl;
+	}
 }
 
 void load_qField()
@@ -77,6 +90,10 @@ void compute_residual()
 
 void time_marching_CTCS()
 {
+	//BC
+	qField_N1[0] = qField_M1[0] - sigma * (qField[1] - qField_LB[1]);
+
+	//interior
 	for (int iNode = 1; iNode < numberOfGridPoints - 1; ++iNode)
 	{
 		qField_N1[iNode] = qField_M1[iNode] - sigma * (qField[iNode + 1] - qField[iNode - 1]);
@@ -85,6 +102,8 @@ void time_marching_CTCS()
 
 void time_marching_1st_upwind()
 {	
+	qField_N1[0] = qField[0] - sigma * (qField[0] - qField_LB[1]);
+
 	for (int iNode = 1; iNode < numberOfGridPoints - 1; ++iNode)
 	{
 		qField_N1[iNode] = qField[iNode] - sigma * (qField[iNode] - qField[iNode-1]);
@@ -93,7 +112,10 @@ void time_marching_1st_upwind()
 
 void time_marching_2nd_upwind()
 {
-	for (int iNode = 1; iNode < numberOfGridPoints - 1; ++iNode)
+	qField_N1[0] = qField[0] - 0.5 * sigma * (3.0 * qField[0] - 4.0 * qField_LB[1] + qField_LB[0]);
+	qField_N1[1] = qField[1] - 0.5 * sigma * (3.0 * qField[1] - 4.0 * qField[0]    + qField_LB[1]);
+
+	for (int iNode = 2; iNode < numberOfGridPoints - 1; ++iNode)
 	{
 		qField_N1[iNode] = qField[iNode] - 0.5 * sigma * (3.0*qField[iNode] - 4.0*qField[iNode - 1] + qField[iNode-2]);
 	}
@@ -101,6 +123,9 @@ void time_marching_2nd_upwind()
 
 void time_marching_lax_wendroff()
 {
+	qField_N1[0] = qField[0] - 0.5 * sigma * (qField[1] - qField_LB[1])
+		+ 0.5 * sigma * sigma * (qField[1] - 2.0 * qField[0] + qField_LB[1]);
+
 	for (int iNode = 1; iNode < numberOfGridPoints - 1; ++iNode)
 	{
 		qField_N1[iNode] = qField[iNode] - 0.5 * sigma * (qField[iNode+1] - qField[iNode-1]) 
@@ -110,6 +135,12 @@ void time_marching_lax_wendroff()
 
 void time_marching_beam_warming()
 {
+	qField_N1[0] = qField[0] - sigma * (qField[0] - qField_LB[1])
+		+ 0.5 * sigma * (1.0 - sigma) * (qField[0] - 2.0 * qField_LB[1] + qField_LB[0]);
+
+	qField_N1[1] = qField[1] - sigma * (qField[1] - qField[0])
+		+ 0.5 * sigma * (1.0 - sigma) * (qField[1] - 2.0 * qField[0] + qField_LB[1]);
+
 	for (int iNode = 2; iNode < numberOfGridPoints - 1; ++iNode)
 	{
 		qField_N1[iNode] = qField[iNode] - sigma * (qField[iNode] - qField[iNode-1]) 
@@ -119,27 +150,53 @@ void time_marching_beam_warming()
 
 void boundary_condition()
 {
-	qField[0] = 0;
-	qField[numberOfGridPoints - 1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];
+	qField[0] = 0;		//边界值
+	qField[numberOfGridPoints - 1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];  //右边界值是通过外插得到的
 
-	qField_N1[0] = 0;
-	qField_N1[numberOfGridPoints - 1] = 2.0 * qField_N1[numberOfGridPoints - 2] - qField_N1[numberOfGridPoints - 3];
+	qField_LB[0] = 2.0 * qField[0] - qField[1];	//外插得到虚拟点值
+	qField_LB[1] = 2.0 * qField[0] - qField[1];
+	qField_RB[0] = 2.0 * qField[numberOfGridPoints - 1] - qField[numberOfGridPoints - 2];
+	qField_RB[1] = 2.0 * qField[numberOfGridPoints - 1] - qField[numberOfGridPoints - 2];
+
+	//qField_N1[0] = 0;
+	//qField_N1[numberOfGridPoints - 1] = 2.0 * qField_N1[numberOfGridPoints - 2] - qField_N1[numberOfGridPoints - 3];
 }
 
 void boundary_condition_periodic()
 {
-	qField[numberOfGridPoints - 1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];
-	qField[0] = qField[numberOfGridPoints - 1];
+	qField_N1[numberOfGridPoints - 1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];  //右边界值是通过外插得到的
+	qField_RB[0] = 2.0 * qField_N1[numberOfGridPoints - 1] - qField_N1[numberOfGridPoints - 2];//外插得到虚拟点值
+	qField_RB[1] = 2.0 * qField_N1[numberOfGridPoints - 1] - qField_N1[numberOfGridPoints - 2];
 
-	qField_M1[numberOfGridPoints - 1] = 2.0 * qField_M1[numberOfGridPoints - 2] - qField_M1[numberOfGridPoints - 3];
-	qField_M1[0] = qField_M1[numberOfGridPoints - 1];
-
-	qField_N1[numberOfGridPoints - 1] = 2.0 * qField_N1[numberOfGridPoints - 2] - qField_N1[numberOfGridPoints - 3];
 	qField_N1[0] = qField_N1[numberOfGridPoints - 1];
+	qField_LB[0] = qField_N1[numberOfGridPoints - 2];
+	qField_LB[1] = qField_N1[numberOfGridPoints - 1];
+
+	//qField_RB[0] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];
+	//qField_RB[1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];
+
+	//qField_LB[0] = qField[numberOfGridPoints - 2];
+	//qField_LB[1] = qField[numberOfGridPoints - 1];
+
+	//qField[numberOfGridPoints - 1] = 2.0 * qField[numberOfGridPoints - 2] - qField[numberOfGridPoints - 3];
+	//qField[0] = qField[numberOfGridPoints - 1];
+
+	//qField_M1[numberOfGridPoints - 1] = 2.0 * qField_M1[numberOfGridPoints - 2] - qField_M1[numberOfGridPoints - 3];
+	//qField_M1[0] = qField_M1[numberOfGridPoints - 1];
+
+	//qField_N1[numberOfGridPoints - 1] = 2.0 * qField_N1[numberOfGridPoints - 2] - qField_N1[numberOfGridPoints - 3];
+	//qField_N1[0] = qField_N1[numberOfGridPoints - 1];
 }
 
 void flow_initialization()
 {
+	qField.resize	(numberOfGridPoints);
+	qField_N1.resize(numberOfGridPoints);
+	qField_M1.resize(numberOfGridPoints);
+
+	qField_LB.resize(2);  //二阶格式需要2个虚拟点
+	qField_RB.resize(2);
+
 	cout << "please choose inflow type..." << endl;
 	cout << "0--阶跃方波；\t1--sine函数；\t3-分段函数；" << endl;
 	cin >> inflowType;
@@ -160,10 +217,6 @@ void flow_initialization()
 
 void flow_initialization_inflow2()
 {
-	//初值
-	qField.resize(numberOfGridPoints);
-	qField_N1.resize(numberOfGridPoints);
-	qField_M1.resize(numberOfGridPoints);
 	if (iter == 0)
 	{
 		for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
@@ -198,10 +251,6 @@ void flow_initialization_inflow2()
 
 void flow_initialization_inflow0()
 {
-	//初值
-	qField.resize(numberOfGridPoints);
-	qField_N1.resize(numberOfGridPoints);
-	qField_M1.resize(numberOfGridPoints);
 	if (iter == 0)
 	{
 		for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
@@ -228,10 +277,6 @@ void flow_initialization_inflow0()
 
 void flow_initialization_inflow1()
 {
-	//初值
-	qField.resize(numberOfGridPoints);
-	qField_N1.resize(numberOfGridPoints);
-	qField_M1.resize(numberOfGridPoints);
 	if (iter == 0)
 	{
 		for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
@@ -284,7 +329,7 @@ void initialize_parameter()
 void generate_grid_1D( int numberOfGridPoints )
 {
 	double startCoord = 0.0; 
-	double endCoord = 2.0 * PI;
+	//double endCoord = 2.0 * PI;
 	ds = ( endCoord - startCoord ) / ( numberOfGridPoints - 1 );
 
 	xCoordinates.resize(numberOfGridPoints);
