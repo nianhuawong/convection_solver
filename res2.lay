@@ -11,6 +11,8 @@ $!VarSet |LFDSFN5| = '"results-CTCS.dat"'
 $!VarSet |LFDSVL5| = '"x" "qField"'
 $!VarSet |LFDSFN6| = '"results-2nd.dat"'
 $!VarSet |LFDSVL6| = '"x" "qField"'
+$!VarSet |LFDSFN7| = '"results-LWTVD.dat"'
+$!VarSet |LFDSVL7| = '"x" "qField"'
 $!SetStyleBase Factory
 $!GlobalPaper 
   PaperSizeInfo
@@ -113,6 +115,17 @@ $!ReadDataSet  '|LFDSFN6|'
   VarNameList = '|LFDSVL6|'
 $!RemoveVar |LFDSVL6|
 $!RemoveVar |LFDSFN6|
+$!ReadDataSet  '|LFDSFN7|'
+  InitialPlotType = XYLine
+  IncludeText = No
+  IncludeGeom = No
+  ReadDataOption = Append
+  ResetStyle = No
+  AssignStrandIDs = Yes
+  VarLoadMode = ByName
+  VarNameList = '|LFDSVL7|'
+$!RemoveVar |LFDSVL7|
+$!RemoveVar |LFDSFN7|
 $!FrameLayout 
   ShowHeader = No
   HeaderColor = Red
@@ -131,7 +144,7 @@ $!FrameName  = 'Frame 001'
 $!GlobalTime 
   SolutionTime = 0
 $!DeleteLineMaps 
-$!ActiveLineMaps  =  [1-3]
+$!ActiveLineMaps  =  [1-3,7]
 $!GlobalLinePlot 
   DataLabels
     {
@@ -151,8 +164,8 @@ $!GlobalLinePlot
       }
     XYPos
       {
-      X = 61.383
-      Y = 90.111
+      X = 68.988
+      Y = 98.222
       }
     }
 $!LineMap  [1]
@@ -328,6 +341,39 @@ $!LineMap  [6]
   Symbols
     {
     Color = Green
+    FillMode = UseLineColor
+    FillColor = Red
+    Size = 1.5
+    }
+  BarCharts
+    {
+    Color = Red
+    FillColor = Red
+    }
+  ErrorBars
+    {
+    Color = Red
+    }
+$!LineMap  [7]
+  Name = 'Lax_Wendroff_TVD'
+  Assign
+    {
+    Zone = 7
+    XAxisVar = 1
+    YAxisVar = 2
+    }
+  Lines
+    {
+    Color = Cyan
+    LineThickness = 0.3
+    }
+  Symbols
+    {
+    SymbolShape
+      {
+      GeomShape = Grad
+      }
+    Color = Blue
     FillMode = UseLineColor
     FillColor = Red
     Size = 1.5

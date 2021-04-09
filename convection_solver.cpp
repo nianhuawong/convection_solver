@@ -67,7 +67,7 @@ void output_results( string fileName )
 void output_residual()
 {
 	int residualOutPut = 200;
-	if (iter % (numberOfTimeSteps/residualOutPut) == 0)
+	//if (iter % (numberOfTimeSteps/residualOutPut) == 0)
 	{
 		cout << "\titer " << "\tresidual" << endl;
 	}
@@ -88,7 +88,8 @@ void compute_residual()
 {
 	for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
 	{
-		residual += (qField_N1[iNode] - qField[iNode]) * (qField_N1[iNode] - qField[iNode]);
+		int nodeIndex = iNode + numberOfGhostPoints;
+		residual += (qField_N1[nodeIndex] - qField[nodeIndex]) * (qField_N1[nodeIndex] - qField[nodeIndex]);
 	}
 
 	residual = sqrt(residual / numberOfGridPoints);  //L2
@@ -131,6 +132,21 @@ void time_marching_lax_wendroff()
 	}
 }
 
+void time_marching_lax_wendroff_TVD()
+{
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		double ita1 = (qField[iNode] - qField[iNode - 1] + SMALL)		/ (qField[iNode + 1] - qField[iNode] + SMALL);
+		double ita2 = (qField[iNode + 2] - qField[iNode + 1] + SMALL)	/ (qField[iNode + 1] - qField[iNode] + SMALL);
+		
+		double ita = ita1;
+		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
+
+		qField_N1[iNode] = qField[iNode] - sigma * (qField[iNode] - qField[iNode - 1])
+			- fai * 0.5 * sigma * (1.0-sigma) * (qField[iNode + 1] - 2.0 * qField[iNode] + qField[iNode - 1]);
+	}
+}
+
 void time_marching_beam_warming()
 {
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
@@ -142,11 +158,23 @@ void time_marching_beam_warming()
 
 void boundary_condition()
 {	
-	qField_N1[0] = 2.0 * qField_N1[2] - qField_N1[4];		//±ß½çÖµ
-	qField_N1[1] = 2.0 * qField_N1[2] - qField_N1[3];
+	qField[0] = 2.0 * qField[2] - qField[4];		
+	qField[1] = 2.0 * qField[2] - qField[3];
+
+	qField[ghostIndex]		= 2.0 * qField[boundaryIndex] - qField[boundaryIndex - 1];
+	qField[ghostIndex + 1]	= 2.0 * qField[boundaryIndex] - qField[boundaryIndex - 2];
+
+	//qField_N1[0] = 2.0 * qField_N1[2] - qField_N1[4];		
+	//qField_N1[1] = 2.0 * qField_N1[2] - qField_N1[3];
 
 	qField_N1[ghostIndex]   = 2.0 * qField_N1[boundaryIndex] - qField_N1[boundaryIndex - 1];  
 	qField_N1[ghostIndex+1] = 2.0 * qField_N1[boundaryIndex] - qField_N1[boundaryIndex - 2];
+	 
+	qField_N1[0] = 0.0;
+	qField_N1[1] = 0.0;
+
+	//qField_N1[ghostIndex]   = -1.0;  
+	//qField_N1[ghostIndex+1] = -1.0;
 }
 
 void boundary_condition_periodic()
@@ -193,21 +221,23 @@ void flow_initialization_inflow3()
 		for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
 		{
 			double xNode = xCoordinates[iNode];
+			int nodeIndex = iNode + numberOfGhostPoints;
+
 			if (xNode >= 0.0 && xNode <= 0.2)
 			{
-				qField[iNode] = 0.0;
+				qField[nodeIndex] = 0.0;
 			}
 			else if(xNode > 0.2 && xNode <= 0.5)
 			{
-				qField[iNode] = sin((xNode - 0.2) * 10.0 * PI);
+				qField[nodeIndex] = sin((xNode - 0.2) * 10.0 * PI);
 			}
 			else if (xNode > 0.5 && xNode <= 0.7)
 			{
-				qField[iNode] = 7.5 * (xNode - 0.5);
+				qField[nodeIndex] = 7.5 * (xNode - 0.5);
 			}
 			else if (xNode > 0.7 && xNode <= 1.0)
 			{
-				qField[iNode] = -1.0;
+				qField[nodeIndex] = -1.0;
 			}
 		}
 	}
@@ -227,13 +257,16 @@ void flow_initialization_inflow1()
 		for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
 		{
 			double xNode = xCoordinates[iNode];
+
+			int nodeIndex = iNode + numberOfGhostPoints;
+
 			if (xNode >= 0.25 && xNode <= 0.75)
 			{
-				qField[iNode] = 1.0;
+				qField[nodeIndex] = 1.0;
 			}
 			else
 			{
-				qField[iNode] = 0.0;
+				qField[nodeIndex] = 0.0;
 			}
 		}
 	}
@@ -253,13 +286,14 @@ void flow_initialization_inflow2()
 		for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
 		{
 			double xNode = xCoordinates[iNode];
+			int nodeIndex = iNode + numberOfGhostPoints;
 			if (xNode >= 0 && xNode <= 2.0*PI)
 			{
-				qField[iNode] = sin(xNode);
+				qField[nodeIndex] = sin(xNode);
 			}
 			else
 			{
-				qField[iNode] = 0.0;
+				qField[nodeIndex] = 0.0;
 			}
 		}
 	}
@@ -313,7 +347,7 @@ void generate_grid_1D( int numberOfGridPoints )
 
 void set_time_march_method()
 {
-	cout << "1--CTCS;\t2--1st_upwind;\t3--2nd_upwind;\t4--Lax_Wendroff;\t5--Beam_Warming, please choose!" << endl;
+	cout << "1--CTCS;\t2--1st_upwind;\t3--2nd_upwind;\t4--Lax_Wendroff;\t5--Beam_Warming, \t6--lax_wendroff_TVD,please choose!" << endl;
 	int time_march_method;
 	cin >> time_march_method;
 	if (time_march_method == 1)
@@ -346,6 +380,13 @@ void set_time_march_method()
 		cout << "time marching method is beam_warming!" << endl;
 		outFile = "results-BW.dat";
 	}
+	else if (time_march_method == 6)
+	{
+		time_marching = &time_marching_lax_wendroff_TVD;
+		cout << "time marching method is lax_wendroff_TVD!" << endl;
+		outFile = "results-LWTVD.dat";
+	}
+	
 	else
 	{
 		cout << "invalid time marching method, program ends!" << endl;

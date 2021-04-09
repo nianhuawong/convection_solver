@@ -1,8 +1,8 @@
 #pragma once
 const double PI = 3.1415926;
-
+const double SMALL = 1e-40;
 int iter;
-int numberOfTimeSteps  = 20000;
+int numberOfTimeSteps  = 50;
 int inflowType = 0;
 
 //int numberOfGridPoints = 801;
@@ -15,7 +15,7 @@ int inflowType = 0;
 //double endCoord  = 2.0 * PI;
 //double totalTime = 4.0 * PI;  //CTCS格式和L-W格式色散特性相同,为负色散，取时间t=32pi，其他均为4pi
 
-int numberOfGridPoints = 51; 
+int numberOfGridPoints = 201; 
 int numberOfGhostPoints = 2;
 int numberOfTotalPoints;
 int ghostIndex;
@@ -53,6 +53,7 @@ void time_marching_CTCS();
 void time_marching_1st_upwind();
 void time_marching_2nd_upwind();
 void time_marching_lax_wendroff();
+void time_marching_lax_wendroff_TVD();
 void time_marching_beam_warming();
 
 void boundary_condition();
