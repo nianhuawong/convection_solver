@@ -15,7 +15,11 @@ int inflowType = 0;
 //double endCoord  = 2.0 * PI;
 //double totalTime = 4.0 * PI;  //CTCS格式和L-W格式色散特性相同,为负色散，取时间t=32pi，其他均为4pi
 
-int numberOfGridPoints = 801; 
+int numberOfGridPoints = 51; 
+int numberOfGhostPoints = 2;
+int numberOfTotalPoints;
+int ghostIndex;
+int boundaryIndex;
 const double coeff_a = 0.2;//分段函数参数
 double endCoord = 1.0;
 double totalTime = 1.0;
