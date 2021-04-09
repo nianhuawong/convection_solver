@@ -164,8 +164,8 @@ $!GlobalLinePlot
       }
     XYPos
       {
-      X = 68.988
-      Y = 98.222
+      X = 69.877
+      Y = 94.778
       }
     }
 $!LineMap  [1]
@@ -207,6 +207,7 @@ $!LineMap  [2]
   Lines
     {
     Color = Green
+    LinePattern = Dashed
     LineThickness = 0.3
     }
   Symbols
@@ -236,6 +237,7 @@ $!LineMap  [3]
   Lines
     {
     Color = Blue
+    LinePattern = DashDot
     LineThickness = 0.3
     }
   Symbols
@@ -365,6 +367,7 @@ $!LineMap  [7]
   Lines
     {
     Color = Cyan
+    LinePattern = LongDash
     LineThickness = 0.3
     }
   Symbols
