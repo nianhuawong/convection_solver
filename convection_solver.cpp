@@ -179,6 +179,68 @@ void time_marching_lax_wendroff_TVD()
 	}
 }
 
+void time_marching_lax_wendroff_TVD_RK3()
+{
+	vector<double> u0(numberOfTotalPoints);
+	u0 = qField;
+
+	vector<double> rhs0(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		double ita1 = (u0[iNode	   ] - u0[iNode - 1] + SMALL) / (u0[iNode + 1] - u0[iNode] + SMALL);
+		double ita2 = (u0[iNode + 2] - u0[iNode + 1] + SMALL) / (u0[iNode + 1] - u0[iNode] + SMALL);
+
+		double ita = ita1;
+		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
+
+		rhs0[iNode] = -sigma * (u0[iNode] - u0[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u0[iNode + 1] - 2.0 * u0[iNode] + u0[iNode - 1]);
+	}
+	//===========
+	vector<double> u1(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		u1[iNode] = u0[iNode] + rhs0[iNode];
+	}
+
+	vector<double> rhs1(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		double ita1 = (u1[iNode	   ] - u1[iNode - 1] + SMALL) / (u1[iNode + 1] - u1[iNode] + SMALL);
+		double ita2 = (u1[iNode + 2] - u1[iNode + 1] + SMALL) / (u1[iNode + 1] - u1[iNode] + SMALL);
+
+		double ita = ita1;
+		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
+
+		rhs1[iNode] = -sigma * (u1[iNode] - u1[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u1[iNode + 1] - 2.0 * u1[iNode] + u1[iNode - 1]);
+	}
+
+	vector<double> u2(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		u2[iNode] = 3.0 / 4.0 * u0[iNode] + 1.0 / 4.0 * u1[iNode] + 1.0 / 4.0 * rhs1[iNode];
+	}
+
+	vector<double> rhs2(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		double ita1 = (u2[iNode	   ] - u2[iNode - 1] + SMALL) / (u2[iNode + 1] - u2[iNode] + SMALL);
+		double ita2 = (u2[iNode + 2] - u2[iNode + 1] + SMALL) / (u2[iNode + 1] - u2[iNode] + SMALL);
+
+		double ita = ita1;
+		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
+
+		rhs2[iNode] = -sigma * (u2[iNode] - u2[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u2[iNode + 1] - 2.0 * u2[iNode] + u2[iNode - 1]);
+	}
+
+	vector<double> u3(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		u3[iNode] = 1.0 / 3.0 * u0[iNode] + 2.0 / 3.0 * u2[iNode] + 2.0 / 3.0  * rhs2[iNode];
+	}
+
+	qField_N1 = u3;
+}
+
 void time_marching_beam_warming()
 {
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
@@ -414,7 +476,8 @@ void set_time_march_method()
 	}
 	else if (time_march_method == 6)
 	{
-		time_marching = &time_marching_lax_wendroff_TVD;
+		//time_marching = &time_marching_lax_wendroff_TVD;
+		time_marching = &time_marching_lax_wendroff_TVD_RK3;
 		cout << "time marching method is lax_wendroff_TVD!" << endl;
 		outFile = "results-LWTVD.dat";
 	}
