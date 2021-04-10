@@ -88,7 +88,8 @@ void output_results( string fileName, vector< double >& qField_out)
 
 	for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
 	{
-		file << xCoordinates[iNode] << "\t" << qField_out[iNode] << endl;
+		int nodeIndex = iNode + numberOfGhostPoints;
+		file << xCoordinates[iNode] << "\t" << qField_out[nodeIndex] << endl;
 	}	
 
 	file.close();
@@ -98,13 +99,13 @@ void output_results( string fileName, vector< double >& qField_out)
 
 void output_residual()
 {
-	int residualOutPut = 200;
-	//if (iter % (numberOfTimeSteps/residualOutPut) == 0)
+	int residualOutPut = 40;
+	if (iter % (numberOfTimeSteps/residualOutPut) == 0)
 	{
 		cout << "\titer " << "\tresidual" << endl;
 	}
 
-	//if (iter % residualOutPut == 0)
+	if (iter % residualOutPut == 0)
 	{
 		cout << "\t" << iter << "\t" << residual << endl;
 	}
@@ -191,7 +192,8 @@ void time_marching_lax_wendroff_TVD_RK3()
 		double ita2 = (u0[iNode + 2] - u0[iNode + 1] + SMALL) / (u0[iNode + 1] - u0[iNode] + SMALL);
 
 		double ita = ita1;
-		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
+		//double fai = (ita + abs(ita)) / (1.0 + abs(ita));
+		double fai = 1.0;
 
 		rhs0[iNode] = -sigma * (u0[iNode] - u0[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u0[iNode + 1] - 2.0 * u0[iNode] + u0[iNode - 1]);
 	}
@@ -202,6 +204,7 @@ void time_marching_lax_wendroff_TVD_RK3()
 		u1[iNode] = u0[iNode] + rhs0[iNode];
 	}
 
+	
 	vector<double> rhs1(numberOfTotalPoints);
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
@@ -209,7 +212,8 @@ void time_marching_lax_wendroff_TVD_RK3()
 		double ita2 = (u1[iNode + 2] - u1[iNode + 1] + SMALL) / (u1[iNode + 1] - u1[iNode] + SMALL);
 
 		double ita = ita1;
-		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
+		//double fai = (ita + abs(ita)) / (1.0 + abs(ita));
+		double fai = 1.0;
 
 		rhs1[iNode] = -sigma * (u1[iNode] - u1[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u1[iNode + 1] - 2.0 * u1[iNode] + u1[iNode - 1]);
 	}
@@ -219,7 +223,7 @@ void time_marching_lax_wendroff_TVD_RK3()
 	{
 		u2[iNode] = 3.0 / 4.0 * u0[iNode] + 1.0 / 4.0 * u1[iNode] + 1.0 / 4.0 * rhs1[iNode];
 	}
-
+	
 	vector<double> rhs2(numberOfTotalPoints);
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
@@ -228,6 +232,7 @@ void time_marching_lax_wendroff_TVD_RK3()
 
 		double ita = ita1;
 		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
+		//double fai = 1.0;
 
 		rhs2[iNode] = -sigma * (u2[iNode] - u2[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u2[iNode + 1] - 2.0 * u2[iNode] + u2[iNode - 1]);
 	}
@@ -441,7 +446,8 @@ void generate_grid_1D( int numberOfGridPoints )
 
 void set_time_march_method()
 {
-	cout << "1--CTCS;\t2--1st_upwind;\t3--2nd_upwind;\t4--Lax_Wendroff;\t5--Beam_Warming, \t6--lax_wendroff_TVD,please choose!" << endl;
+	cout << "1--CTCS;\t2--1st_upwind;\t3--2nd_upwind;\t4--Lax_Wendroff;\t5--Beam_Warming, " << endl;
+	cout << "6--lax_wendroff_TVD; \t7--lax_wendroff_TVD_RK3, please choose!" << endl;
 	int time_march_method;
 	cin >> time_march_method;
 	if (time_march_method == 1)
@@ -476,12 +482,16 @@ void set_time_march_method()
 	}
 	else if (time_march_method == 6)
 	{
-		//time_marching = &time_marching_lax_wendroff_TVD;
-		time_marching = &time_marching_lax_wendroff_TVD_RK3;
+		time_marching = &time_marching_lax_wendroff_TVD;
 		cout << "time marching method is lax_wendroff_TVD!" << endl;
 		outFile = "results-LWTVD.dat";
 	}
-	
+	else if (time_march_method == 7)
+	{
+		time_marching = &time_marching_lax_wendroff_TVD_RK3;
+		cout << "time marching method is lax_wendroff_TVD_RK3!" << endl;
+		outFile = "results-LWTVDRK3.dat";
+	}
 	else
 	{
 		cout << "invalid time marching method, program ends!" << endl;
