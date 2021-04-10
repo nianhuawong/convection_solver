@@ -1,18 +1,18 @@
 #!MC 1410
 $!VarSet |LFDSFN1| = '"results-accurate.dat"'
-$!VarSet |LFDSVL1| = '"x" "qField"'
+$!VarSet |LFDSVL1| = '"x" "qField" "u"'
 $!VarSet |LFDSFN2| = '"results-1st.dat"'
-$!VarSet |LFDSVL2| = '"x" "qField"'
+$!VarSet |LFDSVL2| = '"x" "qField" "u"'
 $!VarSet |LFDSFN3| = '"results-LW.dat"'
-$!VarSet |LFDSVL3| = '"x" "qField"'
+$!VarSet |LFDSVL3| = '"x" "qField" "u"'
 $!VarSet |LFDSFN4| = '"results-BW.dat"'
-$!VarSet |LFDSVL4| = '"x" "qField"'
+$!VarSet |LFDSVL4| = '"x" "qField" "u"'
 $!VarSet |LFDSFN5| = '"results-CTCS.dat"'
-$!VarSet |LFDSVL5| = '"x" "qField"'
+$!VarSet |LFDSVL5| = '"x" "qField" "u"'
 $!VarSet |LFDSFN6| = '"results-2nd.dat"'
-$!VarSet |LFDSVL6| = '"x" "qField"'
+$!VarSet |LFDSVL6| = '"x" "qField" "u"'
 $!VarSet |LFDSFN7| = '"results-LWTVD.dat"'
-$!VarSet |LFDSVL7| = '"x" "qField"'
+$!VarSet |LFDSVL7| = '"x" "qField" "u"'
 $!SetStyleBase Factory
 $!GlobalPaper 
   PaperSizeInfo
@@ -58,8 +58,8 @@ $!ReadDataSet  '|LFDSFN1|'
   VarNameList = '|LFDSVL1|'
 $!RemoveVar |LFDSVL1|
 $!RemoveVar |LFDSFN1|
-$!AlterData 
-  Equation = 'v1=v1+0.2'
+#$!AlterData 
+#  Equation = 'v1=v1+0.0000000000000000002'
 $!ReadDataSet  '|LFDSFN2|'
   InitialPlotType = XYLine
   IncludeText = No
@@ -174,7 +174,7 @@ $!LineMap  [1]
     {
     Zone = 1
     XAxisVar = 1
-    YAxisVar = 2
+    YAxisVar = 3
     }
   Lines
     {
@@ -362,7 +362,7 @@ $!LineMap  [7]
     {
     Zone = 7
     XAxisVar = 1
-    YAxisVar = 2
+    YAxisVar = 3
     }
   Lines
     {

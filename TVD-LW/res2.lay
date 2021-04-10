@@ -398,7 +398,7 @@ $!XYLineAxis
     RangeMin = 0
     RangeMax = 1
     AutoGrid = No
-    GRSpacing = 0.1
+    GRSpacing = 0.2
     }
 $!XYLineAxis 
   YDetail 1

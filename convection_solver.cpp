@@ -1,7 +1,7 @@
-#include<iostream>
-#include<vector>
-#include<fstream>
-
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <iomanip>
 using namespace std;
 #include "convection_solver.h"
 
@@ -33,7 +33,7 @@ int main()
 		physicalTime += dt;
 	}
 
-	output_results(outFile);
+	output_results(outFile, qField_N1);
 	
 	compute_exact_solution();
 
@@ -42,21 +42,53 @@ int main()
 
 void compute_exact_solution()
 {
-	vector<double> exactSolution(numberOfGridPoints);
+	vector<double> exactSolution(numberOfTotalPoints);
+	for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
+	{
+		double ds = coeff_a * physicalTime;
+		double xNode = xCoordinates[iNode];
+		
+		int nodeIndex = iNode + numberOfGhostPoints;
+
+		if (xNode >= 0.0 + ds && xNode <= 0.2 + ds)
+		{
+			exactSolution[nodeIndex] = 0.0;
+		}
+		else if (xNode > 0.2 + ds && xNode <= 0.5 + ds)
+		{
+			xNode -= ds;
+			exactSolution[nodeIndex] = sin((xNode - 0.2) * 10.0 * PI);
+		}
+		else if (xNode > 0.5 + ds && xNode <= 0.7 + ds)
+		{
+			xNode -= ds;
+			exactSolution[nodeIndex] = 7.5 * (xNode - 0.5);
+		}
+		else if (xNode > 0.7 + ds && xNode <= 1.0 + ds)
+		{
+			exactSolution[nodeIndex] = -1.0;
+		}
+	}
+
+	output_results("results-accurate.dat", exactSolution);
 }
 
-void output_results( string fileName )
+void output_results( string fileName, vector< double >& qField_out)
 {
 	cout << "dumping results..." << endl;
 	fstream file;
 	file.open(fileName, ios_base::out );
 
 	file << "TITLE     = \"results\"" << endl;
-	file << "VARIABLES = \"x\", \"qField\"" << endl;
+	file << "VARIABLES = \"x\", \"u\"" << endl;
+
+	file << setiosflags(ios::right);
+	file << setiosflags(ios::scientific);
+	file << setprecision(15);
 
 	for (int iNode = 0; iNode < numberOfGridPoints; ++iNode)
 	{
-		file << xCoordinates[iNode] << "\t" << qField_N1[iNode] << endl;
+		file << xCoordinates[iNode] << "\t" << qField_out[iNode] << endl;
 	}	
 
 	file.close();
@@ -72,7 +104,7 @@ void output_residual()
 		cout << "\titer " << "\tresidual" << endl;
 	}
 
-	if (iter % residualOutPut == 0)
+	//if (iter % residualOutPut == 0)
 	{
 		cout << "\t" << iter << "\t" << residual << endl;
 	}
@@ -245,7 +277,7 @@ void flow_initialization_inflow3()
 	qField_M1 = qField;
 	qField_N1 = qField;
 
-	output_results("results-accurate.dat");
+	//output_results("results-accurate.dat");
 
 	boundary_condition();
 }
@@ -274,7 +306,7 @@ void flow_initialization_inflow1()
 	qField_M1 = qField;
 	qField_N1 = qField;
 
-	output_results("results-accurate.dat");
+	//output_results("results-accurate.dat");
 
 	boundary_condition_periodic();
 }
@@ -301,7 +333,7 @@ void flow_initialization_inflow2()
 	qField_M1 = qField;
 	qField_N1 = qField;
 
-	output_results("results-accurate.dat");
+	//output_results("results-accurate.dat");
 
 	boundary_condition_periodic();
 }

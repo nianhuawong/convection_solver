@@ -2,7 +2,7 @@
 const double PI = 3.1415926;
 const double SMALL = 1e-40;
 int iter;
-int numberOfTimeSteps  = 50;
+int numberOfTimeSteps  = 100;
 int inflowType = 0;
 
 //int numberOfGridPoints = 801;
@@ -34,8 +34,7 @@ string outFile;
 vector< double > qField;
 vector< double > qField_N1;
 vector< double > qField_M1;
-vector< double > qField_LB;
-vector< double > qField_RB;
+
 vector< double > xCoordinates;
 
 void initialize_parameter();
@@ -60,7 +59,7 @@ void boundary_condition();
 void boundary_condition_periodic();
 void compute_residual();
 void output_residual();
-void output_results(string fileName);
+void output_results(string fileName, vector< double > & qField_out);
 
 void generate_grid_1D(int numberOfGridPoints);
 
