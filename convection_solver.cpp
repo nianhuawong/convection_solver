@@ -151,7 +151,7 @@ void time_marching_2nd_upwind()
 {
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
-		qField_N1[iNode] = qField[iNode] - 0.5 * sigma * (3.0*qField[iNode] - 4.0*qField[iNode - 1] + qField[iNode-2]);
+		qField_N1[iNode] = qField[iNode] - 0.5 * sigma * (3.0 * qField[iNode] - 4.0 * qField[iNode - 1] + qField[iNode-2]);
 	}
 }
 
@@ -159,8 +159,8 @@ void time_marching_lax_wendroff()
 {
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
-		qField_N1[iNode] = qField[iNode] - 0.5 * sigma * (qField[iNode+1] - qField[iNode-1]) 
-			             + 0.5 * sigma * sigma *(qField[iNode+1] -2.0 * qField[iNode]+ qField[iNode-1]);
+		qField_N1[iNode] = qField[iNode] - 0.5 * sigma *		(qField[iNode+1] -		qField[iNode-1])           
+										 + 0.5 * sigma * sigma *(qField[iNode+1] -2.0 * qField[iNode]+ qField[iNode-1]);
 	}
 }
 
@@ -175,7 +175,7 @@ void time_marching_lax_wendroff_TVD()
 		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
 
 		qField_N1[iNode] = qField[iNode] - sigma * (qField[iNode] - qField[iNode - 1])
-			- fai * 0.5 * sigma * (1.0-sigma) * (qField[iNode + 1] - 2.0 * qField[iNode] + qField[iNode - 1]);
+							 - fai * 0.5 * sigma * (1.0-sigma) * (qField[iNode + 1] - 2.0 * qField[iNode] + qField[iNode - 1]);
 	}
 }
 
@@ -245,8 +245,8 @@ void time_marching_beam_warming()
 {
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
-		qField_N1[iNode] = qField[iNode] - sigma * (qField[iNode] - qField[iNode-1]) 
-                         - 0.5*sigma*(1.0-sigma)*(qField[iNode]-2.0*qField[iNode-1]+qField[iNode-2]);
+		qField_N1[iNode] = qField[iNode] - sigma *  (qField[iNode] -	   qField[iNode-1]) 
+					- 0.5 * sigma * (1.0 - sigma) * (qField[iNode] - 2.0 * qField[iNode-1] + qField[iNode-2]);
 	}
 }
 
