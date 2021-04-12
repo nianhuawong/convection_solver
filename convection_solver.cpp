@@ -169,14 +169,14 @@ void time_marching_lax_wendroff_TVD()
 {
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
-		double ita1 = (qField[iNode] - qField[iNode - 1] + SMALL)		/ (qField[iNode + 1] - qField[iNode] + SMALL);
+		double ita1 = (qField[iNode]	 - qField[iNode - 1] + SMALL)	/ (qField[iNode + 1] - qField[iNode] + SMALL);
 		double ita2 = (qField[iNode + 2] - qField[iNode + 1] + SMALL)	/ (qField[iNode + 1] - qField[iNode] + SMALL);
 		
-		double ita = ita1;
+		double ita = min(ita1,ita2);
 		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
 
 		qField_N1[iNode] = qField[iNode] - sigma * (qField[iNode] - qField[iNode - 1])
-							 - fai * 0.5 * sigma * (1.0-sigma) * (qField[iNode + 1] - 2.0 * qField[iNode] + qField[iNode - 1]);
+							 - fai * 0.5 * sigma * (1.0-sigma) * (  qField[iNode + 1] - 2.0 * qField[iNode] + qField[iNode - 1]);
 	}
 }
 
@@ -185,15 +185,16 @@ void time_marching_lax_wendroff_TVD_RK3()
 	vector<double> u0(numberOfTotalPoints);
 	u0 = qField;
 
+	double fai = 1.0;
 	vector<double> rhs0(numberOfTotalPoints);
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
 		double ita1 = (u0[iNode	   ] - u0[iNode - 1] + SMALL) / (u0[iNode + 1] - u0[iNode] + SMALL);
 		double ita2 = (u0[iNode + 2] - u0[iNode + 1] + SMALL) / (u0[iNode + 1] - u0[iNode] + SMALL);
 
-		double ita = ita1;
-		//double fai = (ita + abs(ita)) / (1.0 + abs(ita));
-		double fai = 1.0;
+		//double ita = ita1;
+		double ita = min(ita1, ita2);
+		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
 
 		rhs0[iNode] = -sigma * (u0[iNode] - u0[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u0[iNode + 1] - 2.0 * u0[iNode] + u0[iNode - 1]);
 	}
@@ -211,9 +212,9 @@ void time_marching_lax_wendroff_TVD_RK3()
 		double ita1 = (u1[iNode	   ] - u1[iNode - 1] + SMALL) / (u1[iNode + 1] - u1[iNode] + SMALL);
 		double ita2 = (u1[iNode + 2] - u1[iNode + 1] + SMALL) / (u1[iNode + 1] - u1[iNode] + SMALL);
 
-		double ita = ita1;
-		//double fai = (ita + abs(ita)) / (1.0 + abs(ita));
-		double fai = 1.0;
+		//double ita = ita1;
+		double ita = min(ita1, ita2);
+		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
 
 		rhs1[iNode] = -sigma * (u1[iNode] - u1[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u1[iNode + 1] - 2.0 * u1[iNode] + u1[iNode - 1]);
 	}
@@ -230,9 +231,9 @@ void time_marching_lax_wendroff_TVD_RK3()
 		double ita1 = (u2[iNode	   ] - u2[iNode - 1] + SMALL) / (u2[iNode + 1] - u2[iNode] + SMALL);
 		double ita2 = (u2[iNode + 2] - u2[iNode + 1] + SMALL) / (u2[iNode + 1] - u2[iNode] + SMALL);
 
-		double ita = ita1;
-		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
-		//double fai = 1.0;
+		//double ita = ita1;
+		double ita = min(ita1, ita2);
+		double fai = (ita + abs(ita)) / (1.0 + abs(ita));		
 
 		rhs2[iNode] = -sigma * (u2[iNode] - u2[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u2[iNode + 1] - 2.0 * u2[iNode] + u2[iNode - 1]);
 	}

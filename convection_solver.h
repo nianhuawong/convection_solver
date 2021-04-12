@@ -2,7 +2,7 @@
 const double PI = 3.1415926;
 const double SMALL = 1e-40;
 int iter;
-int numberOfTimeSteps  = 50;
+int numberOfTimeSteps  = 5000;
 int inflowType = 0;
 
 //int numberOfGridPoints = 801;
