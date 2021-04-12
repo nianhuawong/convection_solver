@@ -173,8 +173,12 @@ void time_marching_lax_wendroff_TVD()
 		double ita2 = (qField[iNode + 2] - qField[iNode + 1] + SMALL)	/ (qField[iNode + 1] - qField[iNode] + SMALL);
 		
 		double ita = min(ita1,ita2);
-		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
-
+		//double ita = ita1;
+ 
+		//double fai = vanleer_limiter(ita);
+		double fai = minmod_limiter(ita,1.0);
+		//double fai = superbee_limiter(ita);
+		
 		qField_N1[iNode] = qField[iNode] - sigma * (qField[iNode] - qField[iNode - 1])
 							 - fai * 0.5 * sigma * (1.0-sigma) * (  qField[iNode + 1] - 2.0 * qField[iNode] + qField[iNode - 1]);
 	}
@@ -194,7 +198,7 @@ void time_marching_lax_wendroff_TVD_RK3()
 
 		//double ita = ita1;
 		double ita = min(ita1, ita2);
-		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
+		double fai = vanleer_limiter(ita);
 
 		rhs0[iNode] = -sigma * (u0[iNode] - u0[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u0[iNode + 1] - 2.0 * u0[iNode] + u0[iNode - 1]);
 	}
@@ -214,7 +218,7 @@ void time_marching_lax_wendroff_TVD_RK3()
 
 		//double ita = ita1;
 		double ita = min(ita1, ita2);
-		double fai = (ita + abs(ita)) / (1.0 + abs(ita));
+		double fai = vanleer_limiter(ita);
 
 		rhs1[iNode] = -sigma * (u1[iNode] - u1[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u1[iNode + 1] - 2.0 * u1[iNode] + u1[iNode - 1]);
 	}
@@ -233,7 +237,7 @@ void time_marching_lax_wendroff_TVD_RK3()
 
 		//double ita = ita1;
 		double ita = min(ita1, ita2);
-		double fai = (ita + abs(ita)) / (1.0 + abs(ita));		
+		double fai = vanleer_limiter(ita);
 
 		rhs2[iNode] = -sigma * (u2[iNode] - u2[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u2[iNode + 1] - 2.0 * u2[iNode] + u2[iNode - 1]);
 	}
@@ -514,3 +518,15 @@ double minmod_limiter(double a, double b)
 	}
 }
 
+double vanleer_limiter(double a)
+{
+	return (a + abs(a)) / (1.0 + abs(a));
+}
+
+double superbee_limiter(double a)
+{
+	double tmp1 = min(2.0 * a, 1.0);
+	double tmp2 = min(a, 2.0);
+
+	return max(0.0, max(tmp1,tmp2));
+}
