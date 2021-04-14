@@ -449,7 +449,7 @@ $!LineMap  [8]
     Color = Red
     }
 $!LineMap  [9]
-  Name = 'weno_RK3'
+  Name = 'RK3_WENO5'
   Assign
     {
     Zone = 9
@@ -494,8 +494,8 @@ $!XYLineAxis
 $!XYLineAxis 
   YDetail 1
     {
-    RangeMin = -2
-    RangeMax = 2
+    RangeMin = -1
+    RangeMax = 1.5
     GRSpacing = 0.5
     Title
       {

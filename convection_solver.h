@@ -15,7 +15,7 @@ int time_march_method;
 //double endCoord			= 2.0 * PI;
 //double totalTime			= 4.0 * PI;  //CTCS格式和L-W格式色散特性相同,为负色散，取时间t=32pi，其他均为4pi
 
-int numberOfGridPoints	= 201; 
+int numberOfGridPoints	= 101; 
 int numberOfGhostPoints = 2;
 int numberOfTotalPoints;
 int ghostIndex;
