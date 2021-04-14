@@ -423,7 +423,8 @@ void flow_initialization()
 	qField_N1.resize(numberOfTotalPoints);   //n+1时间步的Q值
 	qField_M1.resize(numberOfTotalPoints);	 //n-1时间步的Q值，中心差分格式会用到n-1时间步
 
-	cout << "please choose inflow type..." << endl;
+	cout << "========================================="	 << endl;
+	cout << "please choose inflow type..."				 << endl;
 	cout << "1--阶跃方波；\t2--sine函数；\t3-分段函数；" << endl;
 	cin >> inflowType;
 
@@ -537,11 +538,12 @@ void initialize_parameter()
 {		
 	//cout << "Enter number of grid points..." << endl;
 	//cin >> numberOfGridPoints;
-	cout << "numberOfGridPoints = " << numberOfGridPoints << endl;
+	cout << "numberOfGridPoints = \t" << numberOfGridPoints << endl;
 
 	//cout << "Enter totalTime..." << endl;
 	//cin >> totalTime;
-	cout << "totalTime = " << totalTime << endl;
+	cout << "totalTime = \t\t" << totalTime << endl;
+	cout << endl;
 
 	set_time_march_method();
 	set_limiter();
@@ -552,11 +554,12 @@ void initialize_parameter()
 
 	cout << "Enter number of time steps..." << "iter > " << iter_min << endl;
 	//cin >> numberOfTimeSteps;
-	cout << "numberOfTimeSteps = " << numberOfTimeSteps << endl;
+	cout << "numberOfTimeSteps = \t" << numberOfTimeSteps << endl;
 	
 	dt = totalTime / numberOfTimeSteps;
 	sigma = coeff_a * dt / ds;
-	cout << "sigma = " << sigma << endl;
+	cout << "sigma = \t\t" << sigma << endl;
+	cout << endl;
 }
 
 void generate_grid_1D( int numberOfGridPoints )
@@ -575,9 +578,13 @@ void generate_grid_1D( int numberOfGridPoints )
 
 void set_time_march_method()
 {
-	cout << "1--CTCS;\t2--1st_upwind;\t3--2nd_upwind;\t4--Lax_Wendroff;\t5--Beam_Warming, " << endl;
-	cout << "6--lax_wendroff_TVD; \t7--lax_wendroff_TVD_RK3; \t8--weno-RK3, please choose!" << endl;
-	int time_march_method;
+	cout << "========================================="  << endl;
+	cout << "1--CTCS;          5--Beam_Warming;"		 << endl;
+	cout << "2--1st_upwind;    6--lax_wendroff_TVD;"	 << endl;
+	cout << "3--2nd_upwind;    7--lax_wendroff_TVD_RK3;" << endl;
+	cout << "4--Lax_Wendroff;  8--weno-RK3" << endl;
+	cout << "please choose!" << endl;
+	
 	cin >> time_march_method;
 	if (time_march_method == 1)
 	{
@@ -632,11 +639,17 @@ void set_time_march_method()
 		cout << "invalid time marching method, program ends!" << endl;
 		exit(1);
 	}
+	cout << endl;
 }
 
 void set_limiter()
 {
-	cout << "1--minmod;\t2--vanleer;\t3--superbee; please choose!" << endl;
+	if ((time_march_method != 6) && (time_march_method != 7))
+	{
+		return;
+	}
+	cout << "========================================="				<< endl;
+	cout << "1--minmod;\t2--vanleer;\t3--superbee; please choose!"	<< endl;
 	int limiter_type;
 	cin >> limiter_type;
 	if (limiter_type == 1)
@@ -659,6 +672,7 @@ void set_limiter()
 		cout << "invalid limiter, program ends!" << endl;
 		exit(1);
 	}
+	cout << endl;
 }
 
 
