@@ -2,7 +2,7 @@
 const double PI = 3.1415926;
 const double SMALL = 1e-40;
 int iter;
-int numberOfTimeSteps  = 50000;
+int numberOfTimeSteps  = 10000;
 int inflowType = 0;
 
 //int numberOfGridPoints = 801;
@@ -48,6 +48,10 @@ typedef void (*Time_Marching_Pointer)(); //自定义void类型的指针函数
 Time_Marching_Pointer time_marching;
 void set_time_march_method();
 
+typedef double (*Limiter_Pointer)( double, double ); //自定义double类型的指针函数
+Limiter_Pointer limiter_fun;
+void set_limiter();
+
 void time_marching_CTCS();
 void time_marching_1st_upwind();
 void time_marching_2nd_upwind();
@@ -61,10 +65,9 @@ void boundary_condition_periodic();
 void compute_residual();
 void output_residual();
 void output_results(string fileName, vector< double > & qField_out);
-
+void compute_exact_solution();
 void generate_grid_1D(int numberOfGridPoints);
 
 double minmod_limiter(double a, double b);
-double vanleer_limiter(double a);
-double superbee_limiter(double a);
-void compute_exact_solution();
+double vanleer_limiter(double a, double);
+double superbee_limiter(double a, double);

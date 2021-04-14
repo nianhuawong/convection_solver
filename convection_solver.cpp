@@ -169,18 +169,17 @@ void time_marching_lax_wendroff_TVD()
 {
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
-		double ita1 = (qField[iNode]	 - qField[iNode - 1] + SMALL)	/ (qField[iNode + 1] - qField[iNode] + SMALL);
-		double ita2 = (qField[iNode + 2] - qField[iNode + 1] + SMALL)	/ (qField[iNode + 1] - qField[iNode] + SMALL);
-		
-		double ita = min(ita1,ita2);
-		//double ita = ita1;
+		double dum1 = qField[iNode	  ] - qField[iNode - 1] + SMALL;
+		double dum2 = qField[iNode - 1] - qField[iNode - 2] + SMALL;
+		double dup1 = qField[iNode + 1] - qField[iNode	  ] + SMALL;
  
-		//double fai = vanleer_limiter(ita);
-		double fai = minmod_limiter(ita,1.0);
-		//double fai = superbee_limiter(ita);
+		double ita_p1 = dum1 / dup1;
+		double ita_m1 = dum2 / dum1;
+
+		double fai_p1 = limiter_fun(ita_p1, 1.0);
+		double fai_m1 = limiter_fun(ita_m1, 1.0);
 		
-		qField_N1[iNode] = qField[iNode] - sigma * (qField[iNode] - qField[iNode - 1])
-							 - fai * 0.5 * sigma * (1.0-sigma) * (  qField[iNode + 1] - 2.0 * qField[iNode] + qField[iNode - 1]);
+		qField_N1[iNode] = qField[iNode] - sigma * dum1 - 0.5 * sigma * (1.0-sigma) * (fai_p1 * dup1 - fai_m1 * dum1);
 	}
 }
 
@@ -189,38 +188,42 @@ void time_marching_lax_wendroff_TVD_RK3()
 	vector<double> u0(numberOfTotalPoints);
 	u0 = qField;
 
-	double fai = 1.0;
 	vector<double> rhs0(numberOfTotalPoints);
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
-		double ita1 = (u0[iNode	   ] - u0[iNode - 1] + SMALL) / (u0[iNode + 1] - u0[iNode] + SMALL);
-		double ita2 = (u0[iNode + 2] - u0[iNode + 1] + SMALL) / (u0[iNode + 1] - u0[iNode] + SMALL);
+		double dum1 = u0[iNode	  ] - u0[iNode - 1] + SMALL;
+		double dum2 = u0[iNode - 1] - u0[iNode - 2] + SMALL;
+		double dup1 = u0[iNode + 1] - u0[iNode	  ] + SMALL;
 
-		//double ita = ita1;
-		double ita = min(ita1, ita2);
-		double fai = vanleer_limiter(ita);
+		double ita_p1 = dum1 / dup1;
+		double ita_m1 = dum2 / dum1;
 
-		rhs0[iNode] = -sigma * (u0[iNode] - u0[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u0[iNode + 1] - 2.0 * u0[iNode] + u0[iNode - 1]);
+		double fai_p1 = limiter_fun(ita_p1, 1.0);
+		double fai_m1 = limiter_fun(ita_m1, 1.0);
+
+		rhs0[iNode] = - sigma * dum1 - 0.5 * sigma * (1.0 - sigma) * (fai_p1 * dup1 - fai_m1 * dum1);
 	}
-	//===========
+
 	vector<double> u1(numberOfTotalPoints);
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
 		u1[iNode] = u0[iNode] + rhs0[iNode];
 	}
 
-	
 	vector<double> rhs1(numberOfTotalPoints);
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
-		double ita1 = (u1[iNode	   ] - u1[iNode - 1] + SMALL) / (u1[iNode + 1] - u1[iNode] + SMALL);
-		double ita2 = (u1[iNode + 2] - u1[iNode + 1] + SMALL) / (u1[iNode + 1] - u1[iNode] + SMALL);
+		double dum1 = u1[iNode	  ] - u1[iNode - 1] + SMALL;
+		double dum2 = u1[iNode - 1] - u1[iNode - 2] + SMALL;
+		double dup1 = u1[iNode + 1] - u1[iNode	  ] + SMALL;
 
-		//double ita = ita1;
-		double ita = min(ita1, ita2);
-		double fai = vanleer_limiter(ita);
+		double ita_p1 = dum1 / dup1;
+		double ita_m1 = dum2 / dum1;
 
-		rhs1[iNode] = -sigma * (u1[iNode] - u1[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u1[iNode + 1] - 2.0 * u1[iNode] + u1[iNode - 1]);
+		double fai_p1 = limiter_fun(ita_p1, 1.0);
+		double fai_m1 = limiter_fun(ita_m1, 1.0);
+
+		rhs1[iNode] = - sigma * dum1 - 0.5 * sigma * (1.0 - sigma) * (fai_p1 * dup1 - fai_m1 * dum1);
 	}
 
 	vector<double> u2(numberOfTotalPoints);
@@ -232,14 +235,17 @@ void time_marching_lax_wendroff_TVD_RK3()
 	vector<double> rhs2(numberOfTotalPoints);
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
-		double ita1 = (u2[iNode	   ] - u2[iNode - 1] + SMALL) / (u2[iNode + 1] - u2[iNode] + SMALL);
-		double ita2 = (u2[iNode + 2] - u2[iNode + 1] + SMALL) / (u2[iNode + 1] - u2[iNode] + SMALL);
+		double dum1 = u2[iNode	  ] - u2[iNode - 1] + SMALL;
+		double dum2 = u2[iNode - 1] - u2[iNode - 2] + SMALL;
+		double dup1 = u2[iNode + 1] - u2[iNode	  ] + SMALL;
 
-		//double ita = ita1;
-		double ita = min(ita1, ita2);
-		double fai = vanleer_limiter(ita);
+		double ita_p1 = dum1 / dup1;
+		double ita_m1 = dum2 / dum1;
 
-		rhs2[iNode] = -sigma * (u2[iNode] - u2[iNode - 1]) - fai * 0.5 * sigma * (1.0 - sigma) * (u2[iNode + 1] - 2.0 * u2[iNode] + u2[iNode - 1]);
+		double fai_p1 = limiter_fun(ita_p1, 1.0);
+		double fai_m1 = limiter_fun(ita_m1, 1.0);
+
+		rhs2[iNode] = - sigma * dum1 - 0.5 * sigma * (1.0 - sigma) * (fai_p1 * dup1 - fai_m1 * dum1);
 	}
 
 	vector<double> u3(numberOfTotalPoints);
@@ -262,23 +268,33 @@ void time_marching_beam_warming()
 
 void boundary_condition()
 {	
-	qField[0] = 2.0 * qField[2] - qField[4];		
-	qField[1] = 2.0 * qField[2] - qField[3];
+	qField_N1[0] = -qField_N1[4];
+	qField_N1[1] = -qField_N1[3];
+	qField_N1[2] = 0.0;
 
-	qField[ghostIndex]		= 2.0 * qField[boundaryIndex] - qField[boundaryIndex - 1];
+	qField_N1[ghostIndex  ]  = 2.0 * qField_N1[boundaryIndex] - qField_N1[boundaryIndex - 1];
+	qField_N1[ghostIndex+1]  = 2.0 * qField_N1[boundaryIndex] - qField_N1[boundaryIndex - 2];
+
+	qField[0] = - qField[4];			
+	qField[1] = - qField[3];	
+	qField[2] = 0.0;
+
+	qField[ghostIndex    ]	= 2.0 * qField[boundaryIndex] - qField[boundaryIndex - 1];
 	qField[ghostIndex + 1]	= 2.0 * qField[boundaryIndex] - qField[boundaryIndex - 2];
 
-	//qField_N1[0] = 2.0 * qField_N1[2] - qField_N1[4];		
-	//qField_N1[1] = 2.0 * qField_N1[2] - qField_N1[3];
+	//qField[0] = 0.0;
+	//qField[1] = 0.0;
+	//qField[2] = 0.0;
+	//qField[boundaryIndex] = -1.0;
+	//qField[ghostIndex]	  = -1.0;
+	//qField[ghostIndex+1]  = -1.0;
 
-	qField_N1[ghostIndex]   = 2.0 * qField_N1[boundaryIndex] - qField_N1[boundaryIndex - 1];  
-	qField_N1[ghostIndex+1] = 2.0 * qField_N1[boundaryIndex] - qField_N1[boundaryIndex - 2];
-	 
-	qField_N1[0] = 0.0;
-	qField_N1[1] = 0.0;
-
-	//qField_N1[ghostIndex]   = -1.0;  
-	//qField_N1[ghostIndex+1] = -1.0;
+	//qField_N1[0] = 0.0;
+	//qField_N1[1] = 0.0;
+	//qField_N1[2] = 0.0;
+	//qField_N1[boundaryIndex]	= -1.0;
+	//qField_N1[ghostIndex]		= -1.0;
+	//qField_N1[ghostIndex + 1]	= -1.0;
 }
 
 void boundary_condition_periodic()
@@ -421,6 +437,7 @@ void initialize_parameter()
 	cout << "totalTime = " << totalTime << endl;
 
 	set_time_march_method();
+	set_limiter();
 
 	generate_grid_1D( numberOfGridPoints );
 
@@ -504,6 +521,34 @@ void set_time_march_method()
 	}
 }
 
+void set_limiter()
+{
+	cout << "1--minmod;\t2--vanleer;\t3--superbee; please choose!" << endl;
+	int limiter_type;
+	cin >> limiter_type;
+	if (limiter_type == 1)
+	{
+		limiter_fun = &minmod_limiter;
+		cout << "limiter is minmod!" << endl;
+	}
+	else if (limiter_type == 2)
+	{
+		limiter_fun = &vanleer_limiter;
+		cout << "limiter is vanleer!" << endl;
+	}
+	else if (limiter_type == 3)
+	{
+		limiter_fun = &superbee_limiter;
+		cout << "limiter is superbee!" << endl;
+	}
+	else
+	{
+		cout << "invalid limiter, program ends!" << endl;
+		exit(1);
+	}
+}
+
+
 //ÏÞÖÆÆ÷º¯Êý
 double minmod_limiter(double a, double b)
 {
@@ -518,12 +563,12 @@ double minmod_limiter(double a, double b)
 	}
 }
 
-double vanleer_limiter(double a)
+double vanleer_limiter(double a, double)
 {
 	return (a + abs(a)) / (1.0 + abs(a));
 }
 
-double superbee_limiter(double a)
+double superbee_limiter(double a, double)
 {
 	double tmp1 = min(2.0 * a, 1.0);
 	double tmp2 = min(a, 2.0);
