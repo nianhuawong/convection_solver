@@ -197,6 +197,99 @@ void time_marching_lax_wendroff_TVD()
 	}
 }
 
+void compute_rhs_weno(vector< double >& qField, vector<double>& rhs)
+{
+	//j点处的通量
+	vector<double> fluxVector(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		fluxVector[iNode] = coeff_a * qField[iNode];
+	}
+
+	vector<double> q1(numberOfTotalPoints);
+	vector<double> q2(numberOfTotalPoints);
+	vector<double> q3(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		q1[iNode] =  1.0 / 3.0 * fluxVector[iNode - 2] - 7.0 / 6.0 * fluxVector[iNode - 1] + 11.0 / 6.0 * fluxVector[iNode    ];
+		q2[iNode] = -1.0 / 6.0 * fluxVector[iNode - 1] + 5.0 / 6.0 * fluxVector[iNode    ] + 1.0 / 3.0  * fluxVector[iNode + 1];
+		q3[iNode] =  1.0 / 3.0 * fluxVector[iNode    ] + 5.0 / 6.0 * fluxVector[iNode + 1] - 1.0 / 6.0  * fluxVector[iNode + 2];
+	}
+
+	vector<double> IS1(numberOfTotalPoints);
+	vector<double> IS2(numberOfTotalPoints);
+	vector<double> IS3(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		IS1[iNode] = 13.0 / 12.0 * pow( (fluxVector[iNode - 2] - 2.0 * fluxVector[iNode - 1] +		 fluxVector[iNode])		, 2) 
+				    + 1.0 / 4.0  * pow( (fluxVector[iNode - 2] - 4.0 * fluxVector[iNode - 1] + 3.0 * fluxVector[iNode])		, 2);
+
+		IS2[iNode] = 13.0 / 12.0 * pow( (fluxVector[iNode - 1] - 2.0 * fluxVector[iNode    ] +		 fluxVector[iNode + 1])	, 2) 
+				    + 1.0 / 4.0  * pow( (fluxVector[iNode - 1] -       fluxVector[iNode + 1])								, 2);
+
+		IS3[iNode] = 13.0 / 12.0 * pow( (fluxVector[iNode    ] - 2.0 * fluxVector[iNode + 1] +		 fluxVector[iNode + 2])	, 2) 
+				    + 1.0 / 4.0  * pow( (fluxVector[iNode + 2] - 4.0 * fluxVector[iNode + 1] + 3.0 * fluxVector[iNode])		, 2);
+	}
+
+	double C1 = 1.0 / 10.0, C2 = 3.0 / 5.0, C3 = 3.0 / 10.0;
+	double eps = 1e-6;
+
+	//j+1/2处的通量
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		double a1 = C1 / pow((eps + IS1[iNode]), 2);
+		double a2 = C2 / pow((eps + IS2[iNode]), 2);
+		double a3 = C3 / pow((eps + IS3[iNode]), 2);
+
+		double w1 = a1 / (a1 + a2 + a3);
+		double w2 = a2 / (a1 + a2 + a3);
+		double w3 = a3 / (a1 + a2 + a3);
+
+		fluxVector[iNode] = w1 * q1[iNode] + w2 * q2[iNode] + w3 * q3[iNode];
+	}
+
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		rhs[iNode] = - ( fluxVector[iNode] - fluxVector[iNode - 1]) / ds;
+	}
+}
+
+void time_marching_weno_RK3()
+{
+	vector<double> u0(numberOfTotalPoints);
+	u0 = qField;
+
+	vector<double> rhs0(numberOfTotalPoints);
+	compute_rhs_weno(u0,rhs0);
+
+	vector<double> u1(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		u1[iNode] = u0[iNode] + dt * rhs0[iNode];
+	}
+
+	vector<double> rhs1(numberOfTotalPoints);
+	compute_rhs_weno(u1, rhs1);
+
+	vector<double> u2(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		u2[iNode] = 3.0 / 4.0 * u0[iNode] + 1.0 / 4.0 * u1[iNode] + 1.0 / 4.0 * dt * rhs1[iNode];
+	}
+
+	vector<double> rhs2(numberOfTotalPoints);
+	compute_rhs_weno(u2, rhs2);
+
+	vector<double> u3(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		u3[iNode] = 1.0 / 3.0 * u0[iNode] + 2.0 / 3.0 * u2[iNode] + 2.0 / 3.0 * dt * rhs2[iNode];
+	}
+
+	qField_N1 = u3;
+}
+
+
 void time_marching_lax_wendroff_TVD_RK3()
 {
 	vector<double> u0(numberOfTotalPoints);
@@ -483,7 +576,7 @@ void generate_grid_1D( int numberOfGridPoints )
 void set_time_march_method()
 {
 	cout << "1--CTCS;\t2--1st_upwind;\t3--2nd_upwind;\t4--Lax_Wendroff;\t5--Beam_Warming, " << endl;
-	cout << "6--lax_wendroff_TVD; \t7--lax_wendroff_TVD_RK3, please choose!" << endl;
+	cout << "6--lax_wendroff_TVD; \t7--lax_wendroff_TVD_RK3; \t8--weno-RK3, please choose!" << endl;
 	int time_march_method;
 	cin >> time_march_method;
 	if (time_march_method == 1)
@@ -527,6 +620,12 @@ void set_time_march_method()
 		time_marching = &time_marching_lax_wendroff_TVD_RK3;
 		cout << "time marching method is lax_wendroff_TVD_RK3!" << endl;
 		outFile = "results-LWTVDRK3.dat";
+	}
+	else if (time_march_method == 8)
+	{
+		time_marching = &time_marching_weno_RK3;
+		cout << "time marching method is weno_RK3!" << endl;
+		outFile = "results-wenoRK3.dat";
 	}
 	else
 	{

@@ -2,7 +2,7 @@
 const double PI		= 3.1415926;
 const double SMALL	= 1e-40;
 int iter;
-int numberOfTimeSteps	= 10000;
+int numberOfTimeSteps	= 5000;
 int inflowType			= 0;
 
 //int numberOfGridPoints	= 801;
@@ -58,6 +58,8 @@ void time_marching_lax_wendroff	();
 void time_marching_lax_wendroff_TVD		();
 void time_marching_lax_wendroff_TVD_RK3	();
 void time_marching_beam_warming			();
+void time_marching_weno_RK3				();
+void compute_rhs_weno(vector< double >& qField, vector<double>& rhs);
 
 void boundary_condition			();
 void boundary_condition_periodic();

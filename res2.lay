@@ -15,6 +15,8 @@ $!VarSet |LFDSFN7| = '"results-LWTVD.dat"'
 $!VarSet |LFDSVL7| = '"x" "qField" "u"'
 $!VarSet |LFDSFN8| = '"results-LWTVDRK3.dat"'
 $!VarSet |LFDSVL8| = '"x" "qField" "u"'
+$!VarSet |LFDSFN9| = '"results-wenoRK3.dat"'
+$!VarSet |LFDSVL9| = '"x" "qField" "u"'
 $!SetStyleBase Factory
 $!GlobalPaper 
   PaperSizeInfo
@@ -137,6 +139,17 @@ $!ReadDataSet  '|LFDSFN8|'
   VarNameList = '|LFDSVL8|'
 $!RemoveVar |LFDSVL8|
 $!RemoveVar |LFDSFN8|
+$!ReadDataSet  '|LFDSFN9|'
+  InitialPlotType = XYLine
+  IncludeText = No
+  IncludeGeom = No
+  ReadDataOption = Append
+  ResetStyle = No
+  AssignStrandIDs = Yes
+  VarLoadMode = ByName
+  VarNameList = '|LFDSVL9|'
+$!RemoveVar |LFDSVL9|
+$!RemoveVar |LFDSFN9|
 $!FrameLayout 
   ShowHeader = No
   HeaderColor = Red
@@ -155,7 +168,7 @@ $!FrameName  = 'Frame 001'
 $!GlobalTime 
   SolutionTime = 0
 $!DeleteLineMaps 
-$!ActiveLineMaps  =  [1-3,7-8]
+$!ActiveLineMaps  =  [4,8-9]
 $!GlobalLinePlot 
   DataLabels
     {
@@ -175,103 +188,11 @@ $!GlobalLinePlot
       }
     XYPos
       {
-      X = 76.593
-      Y = 100
+      X = 69.584
+      Y = 93.889
       }
     }
 $!LineMap  [1]
-  Name = 'accurate'
-  Assign
-    {
-    Zone = 1
-    XAxisVar = 1
-    YAxisVar = 3
-    }
-  Lines
-    {
-    Color = Red
-    LineThickness = 0.3
-    }
-  Symbols
-    {
-    Show = No
-    Color = Green
-    FillColor = Red
-    }
-  BarCharts
-    {
-    Color = Red
-    FillColor = Red
-    }
-  ErrorBars
-    {
-    Color = Red
-    }
-$!LineMap  [2]
-  Name = '1st_upwind'
-  Assign
-    {
-    Zone = 2
-    XAxisVar = 1
-    YAxisVar = 3
-    }
-  Lines
-    {
-    Color = Green
-    LinePattern = Dashed
-    LineThickness = 0.3
-    }
-  Symbols
-    {
-    Color = Green
-    FillMode = UseLineColor
-    FillColor = Red
-    Size = 1.5
-    }
-  BarCharts
-    {
-    Color = Red
-    FillColor = Red
-    }
-  ErrorBars
-    {
-    Color = Red
-    }
-$!LineMap  [3]
-  Name = 'Lax_Wendroff'
-  Assign
-    {
-    Zone = 3
-    XAxisVar = 1
-    YAxisVar = 3
-    }
-  Lines
-    {
-    Color = Blue
-    LinePattern = DashDot
-    LineThickness = 0.3
-    }
-  Symbols
-    {
-    SymbolShape
-      {
-      GeomShape = Grad
-      }
-    Color = Blue
-    FillMode = UseLineColor
-    FillColor = Red
-    Size = 1.5
-    }
-  BarCharts
-    {
-    Color = Red
-    FillColor = Red
-    }
-  ErrorBars
-    {
-    Color = Red
-    }
-$!LineMap  [4]
   Name = 'Beam_Warming'
   Assign
     {
@@ -304,7 +225,7 @@ $!LineMap  [4]
     {
     Color = Red
     }
-$!LineMap  [5]
+$!LineMap  [2]
   Name = 'CTCS'
   Assign
     {
@@ -337,71 +258,7 @@ $!LineMap  [5]
     {
     Color = Red
     }
-$!LineMap  [6]
-  Name = '2nd_upwind'
-  Assign
-    {
-    Zone = 6
-    XAxisVar = 1
-    YAxisVar = 3
-    }
-  Lines
-    {
-    Color = Black
-    LinePattern = Dashed
-    LineThickness = 0.3
-    }
-  Symbols
-    {
-    Color = Green
-    FillMode = UseLineColor
-    FillColor = Red
-    Size = 1.5
-    }
-  BarCharts
-    {
-    Color = Red
-    FillColor = Red
-    }
-  ErrorBars
-    {
-    Color = Red
-    }
-$!LineMap  [7]
-  Name = 'Lax_Wendroff_TVD'
-  Assign
-    {
-    Zone = 7
-    XAxisVar = 1
-    YAxisVar = 3
-    }
-  Lines
-    {
-    Color = Cyan
-    LinePattern = LongDash
-    LineThickness = 0.3
-    }
-  Symbols
-    {
-    SymbolShape
-      {
-      GeomShape = Grad
-      }
-    Color = Blue
-    FillMode = UseLineColor
-    FillColor = Red
-    Size = 1.5
-    }
-  BarCharts
-    {
-    Color = Red
-    FillColor = Red
-    }
-  ErrorBars
-    {
-    Color = Red
-    }
-$!LineMap  [8]
+$!LineMap  [3]
   Name = 'Lax_Wendroff_TVD_RK3'
   Assign
     {
@@ -435,6 +292,195 @@ $!LineMap  [8]
     {
     Color = Red
     }
+$!LineMap  [4]
+  Name = 'accurate'
+  Assign
+    {
+    Zone = 1
+    XAxisVar = 1
+    YAxisVar = 3
+    }
+  Lines
+    {
+    Color = Red
+    LineThickness = 0.2
+    }
+  Symbols
+    {
+    Show = No
+    Color = Red
+    FillColor = Red
+    }
+  BarCharts
+    {
+    Color = Red
+    FillColor = Red
+    }
+  ErrorBars
+    {
+    Color = Red
+    }
+$!LineMap  [5]
+  Name = '1st_upwind'
+  Assign
+    {
+    Zone = 2
+    XAxisVar = 1
+    YAxisVar = 3
+    }
+  Lines
+    {
+    Color = Green
+    LineThickness = 0.2
+    }
+  Symbols
+    {
+    Color = Green
+    FillMode = UseLineColor
+    FillColor = Red
+    Size = 1
+    }
+  BarCharts
+    {
+    Color = Red
+    FillColor = Red
+    }
+  ErrorBars
+    {
+    Color = Red
+    }
+$!LineMap  [6]
+  Name = '2nd_upwind'
+  Assign
+    {
+    Zone = 6
+    XAxisVar = 1
+    YAxisVar = 3
+    }
+  Lines
+    {
+    Color = Black
+    LineThickness = 0.2
+    }
+  Symbols
+    {
+    SymbolShape
+      {
+      GeomShape = Del
+      }
+    Color = Black
+    FillMode = UseLineColor
+    FillColor = Red
+    Size = 1
+    }
+  BarCharts
+    {
+    Color = Red
+    FillColor = Red
+    }
+  ErrorBars
+    {
+    Color = Red
+    }
+$!LineMap  [7]
+  Name = 'Lax_Wendroff'
+  Assign
+    {
+    Zone = 3
+    XAxisVar = 1
+    YAxisVar = 3
+    }
+  Lines
+    {
+    Color = Blue
+    LineThickness = 0.2
+    }
+  Symbols
+    {
+    SymbolShape
+      {
+      GeomShape = Diamond
+      }
+    Color = Blue
+    FillMode = UseLineColor
+    FillColor = Red
+    Size = 1
+    }
+  BarCharts
+    {
+    Color = Red
+    FillColor = Red
+    }
+  ErrorBars
+    {
+    Color = Red
+    }
+$!LineMap  [8]
+  Name = 'Lax_Wendroff_TVD'
+  Assign
+    {
+    Zone = 7
+    XAxisVar = 1
+    YAxisVar = 3
+    }
+  Lines
+    {
+    Color = Purple
+    LineThickness = 0.2
+    }
+  Symbols
+    {
+    SymbolShape
+      {
+      GeomShape = Circle
+      }
+    Color = Purple
+    FillMode = UseLineColor
+    FillColor = Red
+    Size = 1
+    }
+  BarCharts
+    {
+    Color = Red
+    FillColor = Red
+    }
+  ErrorBars
+    {
+    Color = Red
+    }
+$!LineMap  [9]
+  Name = 'weno_RK3'
+  Assign
+    {
+    Zone = 9
+    XAxisVar = 1
+    YAxisVar = 3
+    }
+  Lines
+    {
+    Color = Cyan
+    LineThickness = 0.2
+    }
+  Symbols
+    {
+    SymbolShape
+      {
+      GeomShape = Grad
+      }
+    Color = Cyan
+    FillMode = UseLineColor
+    FillColor = Red
+    Size = 1
+    }
+  BarCharts
+    {
+    Color = Red
+    FillColor = Red
+    }
+  ErrorBars
+    {
+    Color = Red
+    }
 $!XYLineAxis 
   DepXToYRatio = 1
 $!XYLineAxis 
@@ -457,6 +503,8 @@ $!XYLineAxis
       Text = 'u'
       }
     }
+$!LinePlotLayers 
+  ShowSymbols = Yes
 $!FrameControl ActivateByNumber
   Frame = 1
 $!SetStyleBase Config
