@@ -167,19 +167,33 @@ void time_marching_lax_wendroff()
 
 void time_marching_lax_wendroff_TVD()
 {
+	double sigma1 = (sigma + abs(sigma)) / 2.0;
+	double sigma2 = (sigma - abs(sigma)) / 2.0;
+	double sigma3 = 0.5 * abs(sigma) * (1.0 - abs(sigma));
+
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
 		double dum1 = qField[iNode	  ] - qField[iNode - 1] + SMALL;
 		double dum2 = qField[iNode - 1] - qField[iNode - 2] + SMALL;
 		double dup1 = qField[iNode + 1] - qField[iNode	  ] + SMALL;
- 
-		double ita_p1 = dum1 / dup1;
-		double ita_m1 = dum2 / dum1;
+		double dup2 = qField[iNode + 2] - qField[iNode + 1] + SMALL;
+
+		double ita_p1, ita_m1;
+		if ( coeff_a > 0 )
+		{//r-
+			ita_p1 = dum1 / dup1;
+			ita_m1 = dum2 / dum1;
+		}
+		else
+		{//r+
+			ita_p1 = dup2 / dup1;
+			ita_m1 = dup1 / dum1;
+		}
 
 		double fai_p1 = limiter_fun(ita_p1, 1.0);
 		double fai_m1 = limiter_fun(ita_m1, 1.0);
 		
-		qField_N1[iNode] = qField[iNode] - sigma * dum1 - 0.5 * sigma * (1.0-sigma) * (fai_p1 * dup1 - fai_m1 * dum1);
+		qField_N1[iNode] = qField[iNode] - sigma1 * dum1  - sigma2 * dup1 - sigma3 * (fai_p1 * dup1 - fai_m1 * dum1);
 	}
 }
 
