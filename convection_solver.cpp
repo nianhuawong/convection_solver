@@ -199,53 +199,113 @@ void time_marching_lax_wendroff_TVD()
 
 void compute_rhs_weno(vector< double >& qField, vector<double>& rhs)
 {
-	//j点处的通量
-	vector<double> fluxVector(numberOfTotalPoints);
+	//j(-)点处的通量
+	vector<double> fluxVector1(numberOfTotalPoints);
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
-		fluxVector[iNode] = coeff_a * qField[iNode];
+		fluxVector1[iNode] = 0.0;
 	}
 
-	vector<double> q1(numberOfTotalPoints);
-	vector<double> q2(numberOfTotalPoints);
-	vector<double> q3(numberOfTotalPoints);
+	//j(+)点处的通量
+	vector<double> fluxVector2(numberOfTotalPoints);
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
-		q1[iNode] =  1.0 / 3.0 * fluxVector[iNode - 2] - 7.0 / 6.0 * fluxVector[iNode - 1] + 11.0 / 6.0 * fluxVector[iNode    ];
-		q2[iNode] = -1.0 / 6.0 * fluxVector[iNode - 1] + 5.0 / 6.0 * fluxVector[iNode    ] + 1.0 / 3.0  * fluxVector[iNode + 1];
-		q3[iNode] =  1.0 / 3.0 * fluxVector[iNode    ] + 5.0 / 6.0 * fluxVector[iNode + 1] - 1.0 / 6.0  * fluxVector[iNode + 2];
+		fluxVector2[iNode] = coeff_a * qField[iNode];
 	}
 
-	vector<double> IS1(numberOfTotalPoints);
-	vector<double> IS2(numberOfTotalPoints);
-	vector<double> IS3(numberOfTotalPoints);
+	//q(j+1/2)-
+	vector<double> q11(numberOfTotalPoints);
+	vector<double> q21(numberOfTotalPoints);
+	vector<double> q31(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex - 1; ++iNode) //iNode+3超出虚拟点个数，妥协一下，循环到boundaryIndex-1
+	{
+		q11[iNode] = -1.0 / 6.0 * fluxVector1[iNode - 1] + 5.0 / 6.0 * fluxVector1[iNode    ] + 1.0 / 3.0 * fluxVector1[iNode + 1];
+		q21[iNode] = 1.0  / 3.0 * fluxVector1[iNode    ] + 5.0 / 6.0 * fluxVector1[iNode + 1] - 1.0 / 6.0 * fluxVector1[iNode + 2];
+		q31[iNode] = 11.0 / 6.0 * fluxVector1[iNode + 1] - 7.0 / 6.0 * fluxVector1[iNode + 2] + 1.0 / 3.0 * fluxVector1[iNode + 3];
+	}
+
+	//q(j+1/2)+
+	vector<double> q12(numberOfTotalPoints);
+	vector<double> q22(numberOfTotalPoints);
+	vector<double> q32(numberOfTotalPoints);
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
-		IS1[iNode] = 13.0 / 12.0 * pow( (fluxVector[iNode - 2] - 2.0 * fluxVector[iNode - 1] +		 fluxVector[iNode])		, 2) 
-				    + 1.0 / 4.0  * pow( (fluxVector[iNode - 2] - 4.0 * fluxVector[iNode - 1] + 3.0 * fluxVector[iNode])		, 2);
-
-		IS2[iNode] = 13.0 / 12.0 * pow( (fluxVector[iNode - 1] - 2.0 * fluxVector[iNode    ] +		 fluxVector[iNode + 1])	, 2) 
-				    + 1.0 / 4.0  * pow( (fluxVector[iNode - 1] -       fluxVector[iNode + 1])								, 2);
-
-		IS3[iNode] = 13.0 / 12.0 * pow( (fluxVector[iNode    ] - 2.0 * fluxVector[iNode + 1] +		 fluxVector[iNode + 2])	, 2) 
-				    + 1.0 / 4.0  * pow( (fluxVector[iNode + 2] - 4.0 * fluxVector[iNode + 1] + 3.0 * fluxVector[iNode])		, 2);
+		q12[iNode] =  1.0 / 3.0 * fluxVector2[iNode - 2] - 7.0 / 6.0 * fluxVector2[iNode - 1] + 11.0 / 6.0 * fluxVector2[iNode    ];
+		q22[iNode] = -1.0 / 6.0 * fluxVector2[iNode - 1] + 5.0 / 6.0 * fluxVector2[iNode    ] + 1.0 / 3.0  * fluxVector2[iNode + 1];
+		q32[iNode] =  1.0 / 3.0 * fluxVector2[iNode    ] + 5.0 / 6.0 * fluxVector2[iNode + 1] - 1.0 / 6.0  * fluxVector2[iNode + 2];
 	}
 
-	double C1 = 1.0 / 10.0, C2 = 3.0 / 5.0, C3 = 3.0 / 10.0;
+	//IS(j+1/2)-
+	vector<double> IS11(numberOfTotalPoints);
+	vector<double> IS21(numberOfTotalPoints);
+	vector<double> IS31(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex - 1; ++iNode) //iNode+3超出虚拟点个数，妥协一下，循环到boundaryIndex-1
+	{
+		IS11[iNode] = 13.0 / 12.0 * pow( (fluxVector1[iNode - 1] - 2.0 * fluxVector1[iNode    ] +	    fluxVector1[iNode + 1])	, 2)
+				    +  1.0 / 4.0  * pow( (fluxVector1[iNode - 1] - 4.0 * fluxVector1[iNode    ] + 3.0 * fluxVector1[iNode + 1])	, 2);
+
+		IS21[iNode] = 13.0 / 12.0 * pow( (fluxVector1[iNode    ] - 2.0 * fluxVector1[iNode + 1] +	    fluxVector1[iNode + 2])	, 2)
+				    +  1.0 / 4.0  * pow( (fluxVector1[iNode    ] -       fluxVector1[iNode + 2])								, 2);
+
+		IS31[iNode] = 13.0 / 12.0 * pow( (fluxVector1[iNode + 1] - 2.0 * fluxVector1[iNode + 2] +	    fluxVector1[iNode + 3])	, 2)
+				    +  1.0 / 4.0  * pow( (fluxVector1[iNode + 3] - 4.0 * fluxVector1[iNode + 2] + 3.0 * fluxVector1[iNode + 1])	, 2);
+	}
+
+	//IS(j+1/2)+
+	vector<double> IS12(numberOfTotalPoints);
+	vector<double> IS22(numberOfTotalPoints);
+	vector<double> IS32(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		IS12[iNode] = 13.0 / 12.0 * pow( (fluxVector2[iNode - 2] - 2.0 * fluxVector2[iNode - 1] +	    fluxVector2[iNode    ])	, 2) 
+				    +  1.0 / 4.0  * pow( (fluxVector2[iNode - 2] - 4.0 * fluxVector2[iNode - 1] + 3.0 * fluxVector2[iNode    ])	, 2);
+
+		IS22[iNode] = 13.0 / 12.0 * pow( (fluxVector2[iNode - 1] - 2.0 * fluxVector2[iNode    ] +	    fluxVector2[iNode + 1])	, 2) 
+				    +  1.0 / 4.0  * pow( (fluxVector2[iNode - 1] -       fluxVector2[iNode + 1])								, 2);
+
+		IS32[iNode] = 13.0 / 12.0 * pow( (fluxVector2[iNode    ] - 2.0 * fluxVector2[iNode + 1] +	    fluxVector2[iNode + 2])	, 2) 
+				    +  1.0 / 4.0  * pow( (fluxVector2[iNode + 2] - 4.0 * fluxVector2[iNode + 1] + 3.0 * fluxVector2[iNode    ])	, 2);
+	}
+	
+	double C11 = 3.0 / 10.0, C21 = 3.0 / 5.0, C31 = 1.0 / 10.0;
+	double C12 = 1.0 / 10.0, C22 = 3.0 / 5.0, C32 = 3.0 / 10.0;
 	double eps = 1e-6;
 
-	//j+1/2处的通量
+	//j+1/2(-)处的通量
+	//vector<double> fluxVector1(numberOfTotalPoints);
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
-		double a1 = C1 / pow((eps + IS1[iNode]), 2);
-		double a2 = C2 / pow((eps + IS2[iNode]), 2);
-		double a3 = C3 / pow((eps + IS3[iNode]), 2);
+		double a1 = C11 / pow((eps + IS11[iNode]), 2);
+		double a2 = C21 / pow((eps + IS21[iNode]), 2);
+		double a3 = C31 / pow((eps + IS31[iNode]), 2);
 
 		double w1 = a1 / (a1 + a2 + a3);
 		double w2 = a2 / (a1 + a2 + a3);
 		double w3 = a3 / (a1 + a2 + a3);
 
-		fluxVector[iNode] = w1 * q1[iNode] + w2 * q2[iNode] + w3 * q3[iNode];
+		fluxVector1[iNode] = w1 * q11[iNode] + w2 * q21[iNode] + w3 * q31[iNode];
+	}
+
+	//j+1/2(+)处的通量
+	//vector<double> fluxVector2(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		double a1 = C12 / pow((eps + IS12[iNode]), 2);
+		double a2 = C22 / pow((eps + IS22[iNode]), 2);
+		double a3 = C32 / pow((eps + IS32[iNode]), 2);
+
+		double w1 = a1 / (a1 + a2 + a3);
+		double w2 = a2 / (a1 + a2 + a3);
+		double w3 = a3 / (a1 + a2 + a3);
+
+		fluxVector2[iNode] = w1 * q12[iNode] + w2 * q22[iNode] + w3 * q32[iNode];
+	}
+
+	//j+1/2处的通量
+	vector<double> fluxVector(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		fluxVector[iNode] = fluxVector1[iNode] + fluxVector2[iNode];
 	}
 
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
