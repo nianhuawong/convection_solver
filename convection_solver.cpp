@@ -37,6 +37,8 @@ int main()
 	
 	compute_exact_solution();
 
+	resfile.close();
+
 	return 0;
 }
 
@@ -103,6 +105,8 @@ void output_residual()
 	if (iter % (numberOfTimeSteps/residualOutPut) == 0)
 	{
 		cout << "\titer " << "\tresidual" << endl;
+
+		resfile << iter << "\t" << residual << endl;
 	}
 
 	if (iter % residualOutPut == 0)
@@ -398,7 +402,7 @@ void compute_rhs_wcns(vector< double >& qField, vector<double>& rhs)
 		double qField_Right2 = qField[iNode + 1] - ds * g2[iNode + 1] / 2.0 + ds * ds * s2[iNode + 1] / 8.0;
 		double qField_Right3 = qField[iNode + 1] - ds * g3[iNode + 1] / 2.0 + ds * ds * s3[iNode + 1] / 8.0;
 
-		//取非线性加权
+		//取非线性加权，左右值分别取不同的权值
 		double a1 = C11 / pow((eps + IS1[iNode]), 2);
 		double a2 = C21 / pow((eps + IS2[iNode]), 2);
 		double a3 = C31 / pow((eps + IS3[iNode]), 2);
@@ -408,6 +412,7 @@ void compute_rhs_wcns(vector< double >& qField, vector<double>& rhs)
 		double w3 = a3 / (a1 + a2 + a3);
 		double qField_Left  = w1 * qField_Left1  + w2 * qField_Left2  + w3 * qField_Left3;
 
+		//取非线性加权，左右值分别取不同的权值
 		a1 = C12 / pow((eps + IS1[iNode]), 2);
 		a2 = C22 / pow((eps + IS2[iNode]), 2);
 		a3 = C32 / pow((eps + IS3[iNode]), 2);
@@ -742,6 +747,14 @@ void initialize_parameter()
 	sigma = coeff_a * dt / ds;
 	cout << "sigma = \t\t" << sigma << endl;
 	cout << endl;
+
+	resfile.open("residual.dat", ios_base::app | ios_base::out);
+	resfile << "TITLE     = \"residual\"" << endl;
+	resfile << "VARIABLES = \"iteration\", \"residual\"" << endl;
+
+	resfile << setiosflags(ios::right);
+	resfile << setiosflags(ios::scientific);
+	resfile << setprecision(15);
 }
 
 void generate_grid_1D( int numberOfGridPoints )

@@ -29,8 +29,8 @@ double dt;
 double ds;
 double sigma;
 double residual;
-string outFile;
-
+string  outFile;
+fstream resfile;
 vector< double > qField;
 vector< double > qField_N1;
 vector< double > qField_M1;
