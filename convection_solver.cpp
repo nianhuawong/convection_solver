@@ -351,6 +351,7 @@ void time_marching_weno_RK3()
 
 void compute_rhs_wcns(vector< double >& qField, vector<double>& rhs)
 {
+	//计算Lagrange插值系数
 	vector<double> g1(numberOfTotalPoints);
 	vector<double> g2(numberOfTotalPoints);
 	vector<double> g3(numberOfTotalPoints);
@@ -369,6 +370,7 @@ void compute_rhs_wcns(vector< double >& qField, vector<double>& rhs)
 		s3[iNode] = (		qField[iNode    ] - 2.0 * qField[iNode + 1] +       qField[iNode + 2]) / ds / ds;
 	}
 
+	//计算光滑因子
 	vector<double> IS1(numberOfTotalPoints);
 	vector<double> IS2(numberOfTotalPoints);
 	vector<double> IS3(numberOfTotalPoints);
@@ -379,21 +381,14 @@ void compute_rhs_wcns(vector< double >& qField, vector<double>& rhs)
 		IS3[iNode] = pow((ds * g3[iNode]), 2) + pow((ds * ds * s3[iNode]), 2);
 	}
 
-	double C1 = 1.0 / 16.0, C2 = 10.0 / 16.0, C3 = 5.0 / 16.0;
+	double C11 = 1.0 / 16.0, C21 = 10.0 / 16.0, C31 = 5.0 / 16.0;
+	double C12 = 5.0 / 16.0, C22 = 10.0 / 16.0, C32 = 1.0 / 16.0;
 	double eps = 1e-6;
 
-	//j+1/2处的变量和Roe通量
+	//j+1/2处的变量左右值和通量
 	vector<double> fluxVector(numberOfTotalPoints);
 	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
 	{
-		double a1 = C1 / pow((eps + IS1[iNode]), 2);
-		double a2 = C2 / pow((eps + IS2[iNode]), 2);
-		double a3 = C3 / pow((eps + IS3[iNode]), 2);
-
-		double w1 = a1 / (a1 + a2 + a3);
-		double w2 = a2 / (a1 + a2 + a3);
-		double w3 = a3 / (a1 + a2 + a3);
-
 		//j+1/2处的左右值，可以由3个模板插值得到3个值
 		double qField_Left1  = qField[iNode] + ds * g1[iNode] / 2.0 + ds * ds * s1[iNode] / 8.0;
 		double qField_Left2  = qField[iNode] + ds * g2[iNode] / 2.0 + ds * ds * s2[iNode] / 8.0;
@@ -404,14 +399,30 @@ void compute_rhs_wcns(vector< double >& qField, vector<double>& rhs)
 		double qField_Right3 = qField[iNode + 1] - ds * g3[iNode + 1] / 2.0 + ds * ds * s3[iNode + 1] / 8.0;
 
 		//取非线性加权
-		double qField_Left  = w1 * qField_Left1  + w2 * qField_Left2  + w3 * qField_Left3;
-		double qField_Right = w1 * qField_Right1 + w2 * qField_Right2 + w3 * qField_Right3;
+		double a1 = C11 / pow((eps + IS1[iNode]), 2);
+		double a2 = C21 / pow((eps + IS2[iNode]), 2);
+		double a3 = C31 / pow((eps + IS3[iNode]), 2);
 
+		double w1 = a1 / (a1 + a2 + a3);
+		double w2 = a2 / (a1 + a2 + a3);
+		double w3 = a3 / (a1 + a2 + a3);
+		double qField_Left  = w1 * qField_Left1  + w2 * qField_Left2  + w3 * qField_Left3;
+
+		a1 = C12 / pow((eps + IS1[iNode]), 2);
+		a2 = C22 / pow((eps + IS2[iNode]), 2);
+		a3 = C32 / pow((eps + IS3[iNode]), 2);
+
+		w1 = a1 / (a1 + a2 + a3);
+		w2 = a2 / (a1 + a2 + a3);
+		w3 = a3 / (a1 + a2 + a3);
+		double qField_Right = w1 * qField_Right1 + w2 * qField_Right2 + w3 * qField_Right3;
+		
+		//计算j+1/2半节点处的通量，Roe
 		double fL = coeff_a * qField_Left ;
 		double fR = coeff_a * qField_Right;
 		double du = qField_Right - qField_Left;
 
-		fluxVector[iNode] = 0.5 * (fL + fR - abs(coeff_a) * du);   //Roe格式,注意此处是j+1/2半节点处的通量
+		fluxVector[iNode] = 0.5 * (fL + fR - abs(coeff_a) * du);
 	}
 
 	//WCNS-E5
