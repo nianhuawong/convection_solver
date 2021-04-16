@@ -59,7 +59,10 @@ void time_marching_lax_wendroff_TVD		();
 void time_marching_lax_wendroff_TVD_RK3	();
 void time_marching_beam_warming			();
 void time_marching_weno_RK3				();
+void time_marching_wcns_RK3				();
+
 void compute_rhs_weno(vector< double >& qField, vector<double>& rhs);
+void compute_rhs_wcns(vector< double >& qField, vector<double>& rhs);
 
 void boundary_condition			();
 void boundary_condition_periodic();

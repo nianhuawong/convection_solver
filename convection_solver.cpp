@@ -289,6 +289,110 @@ void time_marching_weno_RK3()
 	qField_N1 = u3;
 }
 
+void compute_rhs_wcns(vector< double >& qField, vector<double>& rhs)
+{
+	vector<double> g1(numberOfTotalPoints);
+	vector<double> g2(numberOfTotalPoints);
+	vector<double> g3(numberOfTotalPoints);
+
+	vector<double> s1(numberOfTotalPoints);
+	vector<double> s2(numberOfTotalPoints);
+	vector<double> s3(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		g1[iNode] = (       qField[iNode - 2] - 4.0 * qField[iNode - 1] + 3.0 * qField[iNode    ]) / 2.0 / ds;
+		g2[iNode] = (       qField[iNode + 1] -       qField[iNode - 1]                          ) / 2.0 / ds;
+		g3[iNode] = (-3.0 * qField[iNode    ] + 4.0 * qField[iNode + 1] -       qField[iNode + 2]) / 2.0 / ds;
+
+		s1[iNode] = (       qField[iNode - 2] - 2.0 * qField[iNode - 1] +		qField[iNode    ]) / ds / ds;
+		s2[iNode] = (       qField[iNode - 1] - 2.0 * qField[iNode    ] +		qField[iNode + 1]) / ds / ds;
+		s3[iNode] = (		qField[iNode    ] - 2.0 * qField[iNode + 1] +       qField[iNode + 2]) / ds / ds;
+	}
+
+	vector<double> IS1(numberOfTotalPoints);
+	vector<double> IS2(numberOfTotalPoints);
+	vector<double> IS3(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		IS1[iNode] = pow((ds * g1[iNode]), 2) + pow((ds * ds * s1[iNode]), 2);
+		IS2[iNode] = pow((ds * g2[iNode]), 2) + pow((ds * ds * s2[iNode]), 2);
+		IS3[iNode] = pow((ds * g3[iNode]), 2) + pow((ds * ds * s3[iNode]), 2);
+	}
+
+	double C1 = 1.0 / 16.0, C2 = 10.0 / 16.0, C3 = 5.0 / 16.0;
+	double eps = 1e-6;
+
+	//j+1/2处的变量和Roe通量
+	vector<double> fluxVector(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		double a1 = C1 / pow((eps + IS1[iNode]), 2);
+		double a2 = C2 / pow((eps + IS2[iNode]), 2);
+		double a3 = C3 / pow((eps + IS3[iNode]), 2);
+
+		double w1 = a1 / (a1 + a2 + a3);
+		double w2 = a2 / (a1 + a2 + a3);
+		double w3 = a3 / (a1 + a2 + a3);
+
+		double qField_Left1  = qField[iNode] + ds * g1[iNode] / 2.0 + ds * ds * s1[iNode] / 8.0;
+		double qField_Left2  = qField[iNode] + ds * g2[iNode] / 2.0 + ds * ds * s2[iNode] / 8.0;
+		double qField_Left3  = qField[iNode] + ds * g3[iNode] / 2.0 + ds * ds * s3[iNode] / 8.0;
+
+		double qField_Right1 = qField[iNode + 1] - ds * g1[iNode + 1] / 2.0 + ds * ds * s1[iNode + 1] / 8.0;
+		double qField_Right2 = qField[iNode + 1] - ds * g2[iNode + 1] / 2.0 + ds * ds * s2[iNode + 1] / 8.0;
+		double qField_Right3 = qField[iNode + 1] - ds * g3[iNode + 1] / 2.0 + ds * ds * s3[iNode + 1] / 8.0;
+
+		//j+1/2处的左右值
+		double qField_Left  = w1 * qField_Left1  + w2 * qField_Left2  + w3 * qField_Left3;
+		double qField_Right = w1 * qField_Right1 + w2 * qField_Right2 + w3 * qField_Right3;
+
+		double fL = coeff_a * qField_Left ;
+		double fR = coeff_a * qField_Right;
+		double du = qField_Right - qField_Left;
+
+		fluxVector[iNode] = 0.5 * (fL + fR - abs(coeff_a) * du);   //Roe格式
+	}
+
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		rhs[iNode] = -(fluxVector[iNode] - fluxVector[iNode - 1]) / ds;
+	}
+}
+
+void time_marching_wcns_RK3()
+{
+	vector<double> u0(numberOfTotalPoints);
+	u0 = qField;
+
+	vector<double> rhs0(numberOfTotalPoints);
+	compute_rhs_wcns(u0, rhs0);
+
+	vector<double> u1(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		u1[iNode] = u0[iNode] + dt * rhs0[iNode];
+	}
+
+	vector<double> rhs1(numberOfTotalPoints);
+	compute_rhs_wcns(u1, rhs1);
+
+	vector<double> u2(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		u2[iNode] = 3.0 / 4.0 * u0[iNode] + 1.0 / 4.0 * u1[iNode] + 1.0 / 4.0 * dt * rhs1[iNode];
+	}
+
+	vector<double> rhs2(numberOfTotalPoints);
+	compute_rhs_wcns(u2, rhs2);
+
+	vector<double> u3(numberOfTotalPoints);
+	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	{
+		u3[iNode] = 1.0 / 3.0 * u0[iNode] + 2.0 / 3.0 * u2[iNode] + 2.0 / 3.0 * dt * rhs2[iNode];
+	}
+
+	qField_N1 = u3;
+}
 
 void time_marching_lax_wendroff_TVD_RK3()
 {
@@ -578,11 +682,12 @@ void generate_grid_1D( int numberOfGridPoints )
 
 void set_time_march_method()
 {
-	cout << "========================================="  << endl;
-	cout << "1--CTCS;          5--Beam_Warming;"		 << endl;
-	cout << "2--1st_upwind;    6--lax_wendroff_TVD;"	 << endl;
-	cout << "3--2nd_upwind;    7--lax_wendroff_TVD_RK3;" << endl;
-	cout << "4--Lax_Wendroff;  8--weno-RK3" << endl;
+	cout << "========================================="			<< endl;
+	cout << "1--CTCS;                  2--1st_upwind;"			<< endl;
+	cout << "3--2nd_upwind;            4--Lax_Wendroff;"		<< endl;
+	cout << "5--Beam_Warming;          6--lax_wendroff_TVD;  "	<< endl;
+	cout << "7--lax_wendroff_TVD_RK3;  8--weno-RK3;"			<< endl;
+	cout << "9-WCNS_RK3"     << endl;
 	cout << "please choose!" << endl;
 	
 	cin >> time_march_method;
@@ -633,6 +738,12 @@ void set_time_march_method()
 		time_marching = &time_marching_weno_RK3;
 		cout << "time marching method is weno_RK3!" << endl;
 		outFile = "results-wenoRK3.dat";
+	}
+	else if (time_march_method == 9)
+	{
+		time_marching = &time_marching_wcns_RK3;
+		cout << "time marching method is wcns_RK3!" << endl;
+		outFile = "results-wcnsRK3.dat";
 	}
 	else
 	{
