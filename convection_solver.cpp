@@ -334,6 +334,7 @@ void compute_rhs_wcns(vector< double >& qField, vector<double>& rhs)
 		double w2 = a2 / (a1 + a2 + a3);
 		double w3 = a3 / (a1 + a2 + a3);
 
+		//j+1/2处的左右值，可以由3个模板插值得到3个值
 		double qField_Left1  = qField[iNode] + ds * g1[iNode] / 2.0 + ds * ds * s1[iNode] / 8.0;
 		double qField_Left2  = qField[iNode] + ds * g2[iNode] / 2.0 + ds * ds * s2[iNode] / 8.0;
 		double qField_Left3  = qField[iNode] + ds * g3[iNode] / 2.0 + ds * ds * s3[iNode] / 8.0;
@@ -342,7 +343,7 @@ void compute_rhs_wcns(vector< double >& qField, vector<double>& rhs)
 		double qField_Right2 = qField[iNode + 1] - ds * g2[iNode + 1] / 2.0 + ds * ds * s2[iNode + 1] / 8.0;
 		double qField_Right3 = qField[iNode + 1] - ds * g3[iNode + 1] / 2.0 + ds * ds * s3[iNode + 1] / 8.0;
 
-		//j+1/2处的左右值
+		//取非线性加权
 		double qField_Left  = w1 * qField_Left1  + w2 * qField_Left2  + w3 * qField_Left3;
 		double qField_Right = w1 * qField_Right1 + w2 * qField_Right2 + w3 * qField_Right3;
 
@@ -350,12 +351,18 @@ void compute_rhs_wcns(vector< double >& qField, vector<double>& rhs)
 		double fR = coeff_a * qField_Right;
 		double du = qField_Right - qField_Left;
 
-		fluxVector[iNode] = 0.5 * (fL + fR - abs(coeff_a) * du);   //Roe格式
+		fluxVector[iNode] = 0.5 * (fL + fR - abs(coeff_a) * du);   //Roe格式,注意此处是j+1/2半节点处的通量
 	}
 
-	for (int iNode = numberOfGhostPoints; iNode <= boundaryIndex; ++iNode)
+	//WCNS-E5
+	double a = 75.0 / 64.0, b = -25.0 / 384.0, c = 3.0 / 640;
+	for (int iNode = numberOfGhostPoints + 1; iNode <= boundaryIndex; ++iNode)
 	{
-		rhs[iNode] = -(fluxVector[iNode] - fluxVector[iNode - 1]) / ds;
+		rhs[iNode] = a / ds * (fluxVector[iNode    ] - fluxVector[iNode - 1])      //计算j点处的通量导数，即Rhs
+				   + b / ds * (fluxVector[iNode + 1] - fluxVector[iNode - 2])
+				   + c / ds * (fluxVector[iNode + 2] - fluxVector[iNode - 3]);	   //iNode-3导致虚拟单元数不够，先妥协一下，从numberOfGhostPoints+1算起
+
+		rhs[iNode] = -rhs[iNode];
 	}
 }
 

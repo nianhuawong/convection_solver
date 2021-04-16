@@ -17,6 +17,8 @@ $!VarSet |LFDSFN8| = '"results-LWTVDRK3.dat"'
 $!VarSet |LFDSVL8| = '"x" "qField" "u"'
 $!VarSet |LFDSFN9| = '"results-wenoRK3.dat"'
 $!VarSet |LFDSVL9| = '"x" "qField" "u"'
+$!VarSet |LFDSFN10| = '"results-wcnsRK3.dat"'
+$!VarSet |LFDSVL10| = '"x" "qField" "u"'
 $!SetStyleBase Factory
 $!GlobalPaper 
   PaperSizeInfo
@@ -150,6 +152,17 @@ $!ReadDataSet  '|LFDSFN9|'
   VarNameList = '|LFDSVL9|'
 $!RemoveVar |LFDSVL9|
 $!RemoveVar |LFDSFN9|
+$!ReadDataSet  '|LFDSFN10|'
+  InitialPlotType = XYLine
+  IncludeText = No
+  IncludeGeom = No
+  ReadDataOption = Append
+  ResetStyle = No
+  AssignStrandIDs = Yes
+  VarLoadMode = ByName
+  VarNameList = '|LFDSVL10|'
+$!RemoveVar |LFDSVL10|
+$!RemoveVar |LFDSFN10|
 $!FrameLayout 
   ShowHeader = No
   HeaderColor = Red
@@ -168,7 +181,7 @@ $!FrameName  = 'Frame 001'
 $!GlobalTime 
   SolutionTime = 0
 $!DeleteLineMaps 
-$!ActiveLineMaps  =  [4,8-9]
+$!ActiveLineMaps  =  [4,8-10]
 $!GlobalLinePlot 
   DataLabels
     {
@@ -468,6 +481,39 @@ $!LineMap  [9]
       GeomShape = Grad
       }
     Color = Cyan
+    FillMode = UseLineColor
+    FillColor = Red
+    Size = 1
+    }
+  BarCharts
+    {
+    Color = Red
+    FillColor = Red
+    }
+  ErrorBars
+    {
+    Color = Red
+    }
+$!LineMap  [10]
+  Name = 'RK3_WCNS-E5'
+  Assign
+    {
+    Zone = 10
+    XAxisVar = 1
+    YAxisVar = 3
+    }
+  Lines
+    {
+    Color = Green
+    LineThickness = 0.2
+    }
+  Symbols
+    {
+    SymbolShape
+      {
+      GeomShape = Grad
+      }
+    Color = Green
     FillMode = UseLineColor
     FillColor = Red
     Size = 1
