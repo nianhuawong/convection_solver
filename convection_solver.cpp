@@ -398,10 +398,6 @@ void compute_rhs_wcns(vector< double >& qField, vector<double>& rhs)
 		double qField_Left2  = qField[iNode] + ds * g2[iNode] / 2.0 + ds * ds * s2[iNode] / 8.0;
 		double qField_Left3  = qField[iNode] + ds * g3[iNode] / 2.0 + ds * ds * s3[iNode] / 8.0;
 
-		double qField_Right1 = qField[iNode + 1] - ds * g1[iNode + 1] / 2.0 + ds * ds * s1[iNode + 1] / 8.0;
-		double qField_Right2 = qField[iNode + 1] - ds * g2[iNode + 1] / 2.0 + ds * ds * s2[iNode + 1] / 8.0;
-		double qField_Right3 = qField[iNode + 1] - ds * g3[iNode + 1] / 2.0 + ds * ds * s3[iNode + 1] / 8.0;
-
 		//取非线性加权，左右值分别取不同的权值
 		double a1 = C11 / pow((eps + IS1[iNode]), 2);
 		double a2 = C21 / pow((eps + IS2[iNode]), 2);
@@ -412,10 +408,14 @@ void compute_rhs_wcns(vector< double >& qField, vector<double>& rhs)
 		double w3 = a3 / (a1 + a2 + a3);
 		double qField_Left  = w1 * qField_Left1  + w2 * qField_Left2  + w3 * qField_Left3;
 
+		double qField_Right1 = qField[iNode + 1] - ds * g1[iNode + 1] / 2.0 + ds * ds * s1[iNode + 1] / 8.0;
+		double qField_Right2 = qField[iNode + 1] - ds * g2[iNode + 1] / 2.0 + ds * ds * s2[iNode + 1] / 8.0;
+		double qField_Right3 = qField[iNode + 1] - ds * g3[iNode + 1] / 2.0 + ds * ds * s3[iNode + 1] / 8.0;
+
 		//取非线性加权，左右值分别取不同的权值
-		a1 = C12 / pow((eps + IS1[iNode]), 2);
-		a2 = C22 / pow((eps + IS2[iNode]), 2);
-		a3 = C32 / pow((eps + IS3[iNode]), 2);
+		a1 = C12 / pow((eps + IS1[iNode + 1]), 2);
+		a2 = C22 / pow((eps + IS2[iNode + 1]), 2);
+		a3 = C32 / pow((eps + IS3[iNode + 1]), 2);
 
 		w1 = a1 / (a1 + a2 + a3);
 		w2 = a2 / (a1 + a2 + a3);
